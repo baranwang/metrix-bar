@@ -1,0 +1,2597 @@
+<bar protocol-version="0"
+     category="monitoring"
+     version="1.2.0"
+     icon="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDIwMCAyMDAiPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAsMjAwKSBzY2FsZSgwLjEsLTAuMSkiIGZpbGw9ImN1cnJlbnRDb2xvciI+PHBhdGggZD0iTTg0NCAxODc1IGMtNDAgLTcgLTg5IC0xOCAtMTEwIC0yNSAtNzEgLTIyIC0yMjAgLTEwMSAtMjc3IC0xNDUgLTgxCi02NSAtMTg4IC0xOTQgLTI0MCAtMjk0IC0xMzQgLTI1MyAtMTM0IC01NzAgMCAtODIzIDYxIC0xMTYgODkgLTE0NSAxNDYgLTE1Mwo0OCAtNyAxMTkgMTYgMTQ1IDQ3IDExIDE0IDYgMTcgLTM1IDIyIC02NCA5IC0xNjYgNTkgLTIxMCAxMDMgLTgwIDgxIC0xMzEKMTk0IC0xMDMgMjI4IDMwIDM2IDc0IDEyIDEwMCAtNTMgMTUgLTM3IDkwIC0xMTggMTE5IC0xMjcgMjEgLTYgNzEgMTAgNzEgMjMKMCA1IC0xOSAxNyAtNDIgMjggLTEzMyA2MCAtMjI3IDI0MyAtMjI4IDQ0NyAwIDEwMiAxOCAxNDcgNTkgMTQ3IDE2IDAgMzMgLTYKMzggLTEyIDQgLTcgOCAtNjAgOSAtMTE4IDEgLTE0MiAxMCAtMTYxIDQwIC04MSA0MCAxMDYgMTE1IDIyNiAyNTAgMzk2IDgxCjEwMyAxMTkgMTY2IDEyOSAyMTMgNCAxNyA5IDMyIDExIDMyIDMgMCAyMyAtOSA0NSAtMjEgbDQxIC0yMCAtOSAtNTIgYy0xNAotODggLTggLTE4NyAxNiAtMjQ4IDEyIC0zMSA1MCAtMTAzIDg0IC0xNjAgNzUgLTEyNSA4MyAtMTQzIDkyIC0yMDMgNCAtMjUgMTEKLTQ2IDE3IC00NiA1IDAgMzEgMjIgNTggNDkgOTEgOTEgMTM1IDIyMCAxMTEgMzI2IC03IDMxIC0yMiA3NyAtMzMgMTAxIC0xOAo0MiAtMTggNDcgLTQgNzAgOSAxMyAyMyAyNCAzMSAyNCAxMSAwIDQgMTggLTI0IDYzIGwtNDAgNjIgNDYgMjQgYzQ1IDIyIDQ3CjIzIDYwIDUgNzMgLTEwNCAxNjEgLTE4MiAyNTggLTIyOSA2NiAtMzMgMTkyIC03MiAyMDEgLTYyIDIgMiAtMzEgMjUgLTczIDUwCi0xMDQgNjIgLTE1MyAxMDkgLTE1MyAxNDggMCAyMiA3IDMyIDI1IDQxIDIxIDkgMjkgNyA1NyAtMTYgNDcgLTM4IDE3OSAtMTI2CjE5MCAtMTI2IDI0IDAgLTcwIDEwOCAtMTUxIDE3NCAtMjA1IDE2NyAtNDY2IDIzNyAtNzE3IDE5MXogTTEyNTYgMTQyOCBjMjUKLTY1IDgxIC0xNTQgMTI3IC0yMDMgMjggLTI5IDI5IC0yOSAyMiAtNSAtNCAxNCAtMjAgNDkgLTM2IDc5IC0xNiAzMCAtMjkgNjYKLTMwIDgwIDAgMTkgLTE0IDM3IC01NCA2OCBsLTUzIDQzIDI0IC02MnogTTU4NSAxMzEyIGMtODkgLTEzNiAtMTgyIC0zMDgKLTE3MyAtMzE4IDMgLTIgMjkgMTMgNTkgMzUgNjAgNDQgNTggNDMgOTUgODkgMjggMzUgNTAgMzkgOTIgMTggMTUgLTcgNjQgLTE2CjExMCAtMTkgbDgzIC01IC0xOCAyOCBjLTc1IDExOCAtMTA1IDE3NSAtMTI1IDIzNyAtMTMgNDAgLTI1IDczIC0yOCA3MyAtMyAwCi00NSAtNjIgLTk1IC0xMzh6IE0xNDgxIDEzMDEgYzQ3IC04MiAxODQgLTI1NyAxODcgLTIzOCA1IDI1IC0xNSAxMTMgLTQwIDE3OQotMjIgNTUgLTIzIDU2IC03NyA3MSAtMzEgNyAtNjQgMTggLTc1IDIyIC0xNiA3IC0xNiA0IDUgLTM0eiBNMTc2NiAxMzA5IGMtMjIKLTUgLTQxIC0xMSAtNDMgLTEyIC0xIC0yIDYgLTMxIDE3IC02NSA0NiAtMTQ2IDQ0IC0zMTIgLTUgLTQxOSAtMjAgLTQzIC0yMQotNTMgLTkgLTUzIDM2IDAgMTE0IDYyIDE0MCAxMTIgMjIgNDIgMTggMjM0IC02IDMzMyAtMzMgMTMxIC0yMyAxMjAgLTk0IDEwNHoKTTEyNDkgMTE1MyBjLTM2IC0xMzEgLTIwMSAtMjkzIC0yOTcgLTI5MyAtNDUgMCAtNjUgMzAgLTYzIDk0IGwxIDU1IC0zNyAtNgpjLTIxIC0zIC0zOSAtNyAtNDAgLTcgLTEgLTEgNyAtMjIgMTkgLTQ2IDMxIC02MyAzNSAtMTM3IDEwIC0xODcgLTQ4IC05MgotMTMzIC0xMjkgLTIyNiAtOTggLTI3IDkgLTQ5IDE1IC01MSAxMyAtNSAtNiAtMzUgLTY3IC0zNSAtNzIgMCAtMiAxNiAwIDM2IDYKNzEgMTkgMTA2IC0xMiA5MCAtODAgLTEzIC01NSAtMTMgLTU1IDQ4IC03NCAxNDEgLTQzIDM1NiAtNDcgNTQzIC05IDE4MCAzNwozMDcgMTAxIDM2MSAxODEgMjMgMzQgMjMgMzQgNCA1MCAtMzYgMjggLTM0IDUxIDcgMTE5IGwzOSA2MyAtMzggMzQgYy00NiA0MgotNTQgNDIgLTQ2IDQgMTAgLTUzIC0xMSAtMTI0IC00OSAtMTYwIC0zMCAtMjkgLTQzIC0zNCAtOTMgLTM4IC05NSAtNyAtMTYyCjM3IC0xODcgMTIyIC0zMyAxMDkgLTIgMjM3IDY2IDI3MiBsMjkgMTUgLTMyIDQ0IGMtMTggMjQgLTM2IDQ0IC0zOSA0NSAtNCAwCi0xMiAtMjEgLTIwIC00N3ogbS03OSAtNTQzIGMyNCAtMjQgMjUgLTMyIDUgLTc1IC0xNyAtMzQgLTUwIC01NSAtODkgLTU1IC02MAowIC05OCA4OCAtNTcgMTI5IDI5IDI5IDExMiAzMCAxNDEgMXogTTEzNTEgOTkxIGMtMzcgLTM3IC0xOSAtNzggNDAgLTg3IDI5Ci01IDQxIC0yIDU4IDE1IDI2IDI2IDI2IDMzIDQgNjAgLTI3IDMyIC03NiAzOCAtMTAyIDEyeiBNNjMwIDk4MyBjLTUyIC0xOQotNjYgLTcyIC0yNiAtOTggMjggLTE5IDY0IC0xMiA5NSAxNiA1MCA0NyAwIDEwNyAtNjkgODJ6IE0xMzEyIDg3OCBjLTcgLTcKLTEyIC0yNyAtMTIgLTQ1IDAgLTgyIDEyOCAtMTI1IDE5MCAtNjMgMjEgMjEgMjYgNjUgMTEgODggLTE3IDI4IC0xNjUgNDQKLTE4OSAyMHogTTY0MiA4NDkgYy02MiAtMjQgLTgyIC01NCAtNjQgLTk0IDI2IC01NyAxMzggLTcxIDE4OCAtMjQgMzggMzYgMzgKMTA2IDAgMTMxIC0xOSAxMyAtNjkgOCAtMTI0IC0xM3ogTTQ0NyA4NDAgYy00MSAtMTggLTM5IC0yNCAyMSAtNTQgMzYgLTE4IDM4Ci0xNCAyMyA0NSBsLTYgMjYgLTM4IC0xN3ogTTE3MTMgNTc5IGMtOTggLTQ4IC0xNzEgLTE4MCAtMTMzIC0yMzkgMTUgLTI0IDEwNwo3OSAxOTQgMjE4IGwyNiA0MiAtMjIgMCBjLTEzIDAgLTQyIC05IC02NSAtMjF6IE0xMzk1IDM5MSBsLTUwIC0xOCAzNiAtNCBjNDYKLTYgNTcgLTIgNjkgMjIgMTMgMjMgMTAgMjMgLTU1IDB6IE01NjYgMzkyIGMtMyAtNSAtMiAtMTggMSAtMzAgNiAtMjUgNDMgLTI5CjkwIC0xMSBsMjggMTEgLTUwIDE5IGMtNTYgMjEgLTYyIDIyIC02OSAxMXogTTQzNSAzNDEgbC0zMCAtNiA1MyAtNDIgYzYxIC00OQo4NSAtNTggMTA5IC00NCAxNyAxMCAxNyAxMCAxIDExIC0zNCAwIC02NiAyMyAtNzUgNTMgLTkgMzQgLTE1IDM3IC01OCAyOHoKTTEwNjAgMzM1IGMtMTM3IC0xMSAtMTQ5IC0xNCAtMjI1IC01MSAtODUgLTQyIC0xNzUgLTkzIC0xNzUgLTEwMCAwIC0xNyAxNzMKLTY0IDI0MSAtNjQgNDUgMCA0NSAwIDQxIDMwIC0yIDE3IDEgMzcgOCA0NSAxOCAyMiA5MyAyMCAxMTMgLTMgMjEgLTIzIDIxCi0zMSAyIC01MiAtMTQgLTE2IC0xMyAtMTggMTMgLTIzIDE2IC0zIDQ1IDAgNjYgNyBsMzYgMTMgLTI1IDExIGMtMzQgMTYgLTMyCjQ4IDUgNjcgNTYgMjkgMTA5IDExIDExMCAtMzcgMCAtMjUgNDcgLTE0IDEzNSAzMCA2NyAzNCA2OSAzNSA0NSA0NiAtMTQgNgotMjcgMTMgLTMwIDE3IC0zIDQgLTMwIDEyIC02MCAxOCAtMzAgNyAtNzMgMjMgLTk3IDM2IC0yMyAxNCAtNDUgMjQgLTUwIDI0Ci00IC0xIC03MyAtNyAtMTUzIC0xNHoiLz48L2c+PC9zdmc+"
+     description="Monitor multi-server status, real-time bandwidth, total traffic, and historical load &amp; ping trends with Komari."
+     license="AGPL-3.0-only"
+     homepage="https://komari-document.pages.dev/"
+     id="komari"
+     title="Komari"
+     refresh="5s"
+     material="solid">
+
+  <permissions>
+    <network origin="{{ inputs.baseURL }}" />
+  </permissions>
+
+  <inputs>
+    <input name="baseURL"
+           type="string"
+           label="Komari Server URL"
+           placeholder="https://status.example.com"
+           required="true"
+           help="Base URL of your Komari instance (e.g. `https://status.example.com`)." />
+    <input name="apiKey"
+           type="secret"
+           label="API Key"
+           help="Optional. Bearer API key (`Authorization: Bearer token`) for private sites (`private_site`) or viewing hidden nodes." />
+    <input name="refreshInterval"
+           type="select"
+           label="Refresh Interval / 刷新间隔"
+           default="5"
+           help="Polling interval for fetching real-time server status.">
+      <option value="2" label="2s (2 秒)" />
+      <option value="5" label="5s (5 秒 - 默认)" />
+      <option value="10" label="10s (10 秒)" />
+      <option value="30" label="30s (30 秒)" />
+      <option value="60" label="60s (60 秒)" />
+    </input>
+    <input name="trayFormat"
+           type="select"
+           label="Tray Display / 托盘显示"
+           default="online_total"
+           help="Metrics shown in the macOS menu bar / system tray.">
+      <option value="online_total" label="10/10 · 1.1M/s (在线数 + 总带宽)" />
+      <option value="total" label="1.1M/s (仅总带宽)" />
+      <option value="online_both" label="10/10 · ↑Up ↓Down (在线数 + 上下行)" />
+      <option value="online" label="10/10 (仅在线节点数)" />
+    </input>
+    <input name="offlineNotify"
+           type="bool"
+           label="Offline Alerts / 离线通知"
+           default="true"
+           help="Send a desktop notification when an online server goes offline." />
+  </inputs>
+
+  <docs><![CDATA[Connect to a Komari monitoring server. Set Komari Server URL to your instance origin (for example https://status.example.com). Public Komari sites work without credentials; for private sites or hidden nodes, add an admin API key (requires Komari > 1.0.3).]]></docs>
+
+  <script apis="app localStorage match-media notification shell"><![CDATA[
+// Komari multi-server monitoring dashboard for Metrix.Bar.
+
+const h = (type, props, ...children) => ({
+  type,
+  props: props || {},
+  children: children.flat().filter(c => c !== null && c !== undefined && c !== false),
+});
+const TX = (text, props) => h("Text", props, String(text));
+
+const K = {
+  muted: "textMuted",
+  hover: "surfaceHover",
+  press: "surfacePressed",
+  line: "border",
+  up: "success",
+  warn: "warning",
+  down: "danger",
+  accent: "accent",
+};
+const W = 460;
+
+const svg = paths =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+
+const BRAND_DARK = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 200 200\"><g transform=\"translate(0,200) scale(0.1,-0.1)\" fill=\"currentColor\"><path d=\"M844 1875 c-40 -7 -89 -18 -110 -25 -71 -22 -220 -101 -277 -145 -81\n-65 -188 -194 -240 -294 -134 -253 -134 -570 0 -823 61 -116 89 -145 146 -153\n48 -7 119 16 145 47 11 14 6 17 -35 22 -64 9 -166 59 -210 103 -80 81 -131\n194 -103 228 30 36 74 12 100 -53 15 -37 90 -118 119 -127 21 -6 71 10 71 23\n0 5 -19 17 -42 28 -133 60 -227 243 -228 447 0 102 18 147 59 147 16 0 33 -6\n38 -12 4 -7 8 -60 9 -118 1 -142 10 -161 40 -81 40 106 115 226 250 396 81\n103 119 166 129 213 4 17 9 32 11 32 3 0 23 -9 45 -21 l41 -20 -9 -52 c-14\n-88 -8 -187 16 -248 12 -31 50 -103 84 -160 75 -125 83 -143 92 -203 4 -25 11\n-46 17 -46 5 0 31 22 58 49 91 91 135 220 111 326 -7 31 -22 77 -33 101 -18\n42 -18 47 -4 70 9 13 23 24 31 24 11 0 4 18 -24 63 l-40 62 46 24 c45 22 47\n23 60 5 73 -104 161 -182 258 -229 66 -33 192 -72 201 -62 2 2 -31 25 -73 50\n-104 62 -153 109 -153 148 0 22 7 32 25 41 21 9 29 7 57 -16 47 -38 179 -126\n190 -126 24 0 -70 108 -151 174 -205 167 -466 237 -717 191z M1256 1428 c25\n-65 81 -154 127 -203 28 -29 29 -29 22 -5 -4 14 -20 49 -36 79 -16 30 -29 66\n-30 80 0 19 -14 37 -54 68 l-53 43 24 -62z M585 1312 c-89 -136 -182 -308\n-173 -318 3 -2 29 13 59 35 60 44 58 43 95 89 28 35 50 39 92 18 15 -7 64 -16\n110 -19 l83 -5 -18 28 c-75 118 -105 175 -125 237 -13 40 -25 73 -28 73 -3 0\n-45 -62 -95 -138z M1481 1301 c47 -82 184 -257 187 -238 5 25 -15 113 -40 179\n-22 55 -23 56 -77 71 -31 7 -64 18 -75 22 -16 7 -16 4 5 -34z M1766 1309 c-22\n-5 -41 -11 -43 -12 -1 -2 6 -31 17 -65 46 -146 44 -312 -5 -419 -20 -43 -21\n-53 -9 -53 36 0 114 62 140 112 22 42 18 234 -6 333 -33 131 -23 120 -94 104z\nM1249 1153 c-36 -131 -201 -293 -297 -293 -45 0 -65 30 -63 94 l1 55 -37 -6\nc-21 -3 -39 -7 -40 -7 -1 -1 7 -22 19 -46 31 -63 35 -137 10 -187 -48 -92\n-133 -129 -226 -98 -27 9 -49 15 -51 13 -5 -6 -35 -67 -35 -72 0 -2 16 0 36 6\n71 19 106 -12 90 -80 -13 -55 -13 -55 48 -74 141 -43 356 -47 543 -9 180 37\n307 101 361 181 23 34 23 34 4 50 -36 28 -34 51 7 119 l39 63 -38 34 c-46 42\n-54 42 -46 4 10 -53 -11 -124 -49 -160 -30 -29 -43 -34 -93 -38 -95 -7 -162\n37 -187 122 -33 109 -2 237 66 272 l29 15 -32 44 c-18 24 -36 44 -39 45 -4 0\n-12 -21 -20 -47z m-79 -543 c24 -24 25 -32 5 -75 -17 -34 -50 -55 -89 -55 -60\n0 -98 88 -57 129 29 29 112 30 141 1z M1351 991 c-37 -37 -19 -78 40 -87 29\n-5 41 -2 58 15 26 26 26 33 4 60 -27 32 -76 38 -102 12z M630 983 c-52 -19\n-66 -72 -26 -98 28 -19 64 -12 95 16 50 47 0 107 -69 82z M1312 878 c-7 -7\n-12 -27 -12 -45 0 -82 128 -125 190 -63 21 21 26 65 11 88 -17 28 -165 44\n-189 20z M642 849 c-62 -24 -82 -54 -64 -94 26 -57 138 -71 188 -24 38 36 38\n106 0 131 -19 13 -69 8 -124 -13z M447 840 c-41 -18 -39 -24 21 -54 36 -18 38\n-14 23 45 l-6 26 -38 -17z M1713 579 c-98 -48 -171 -180 -133 -239 15 -24 107\n79 194 218 l26 42 -22 0 c-13 0 -42 -9 -65 -21z M1395 391 l-50 -18 36 -4 c46\n-6 57 -2 69 22 13 23 10 23 -55 0z M566 392 c-3 -5 -2 -18 1 -30 6 -25 43 -29\n90 -11 l28 11 -50 19 c-56 21 -62 22 -69 11z M435 341 l-30 -6 53 -42 c61 -49\n85 -58 109 -44 17 10 17 10 1 11 -34 0 -66 23 -75 53 -9 34 -15 37 -58 28z\nM1060 335 c-137 -11 -149 -14 -225 -51 -85 -42 -175 -93 -175 -100 0 -17 173\n-64 241 -64 45 0 45 0 41 30 -2 17 1 37 8 45 18 22 93 20 113 -3 21 -23 21\n-31 2 -52 -14 -16 -13 -18 13 -23 16 -3 45 0 66 7 l36 13 -25 11 c-34 16 -32\n48 5 67 56 29 109 11 110 -37 0 -25 47 -14 135 30 67 34 69 35 45 46 -14 6\n-27 13 -30 17 -3 4 -30 12 -60 18 -30 7 -73 23 -97 36 -23 14 -45 24 -50 24\n-4 -1 -73 -7 -153 -14z\"/></g></svg>";
+const BRAND_LIGHT = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 200 200\"><g transform=\"translate(0,200) scale(0.1,-0.1)\" fill=\"currentColor\"><path d=\"M819 1975 c-473 -95 -809 -500 -809 -975 0 -609 558 -1081 1155 -976\n415 73 738 396 811 811 83 473 -203 950 -664 1104 -148 50 -348 64 -493 36z\nm338 -100 c215 -41 419 -167 548 -340 l30 -39 -60 33 c-53 30 -131 85 -145\n102 -6 7 -46 29 -54 29 -13 0 -36 -34 -36 -54 0 -35 81 -105 194 -167 101 -56\n-64 -21 -174 37 -103 54 -178 122 -266 242 -4 6 -84 -38 -84 -46 0 -4 15 -32\n34 -62 l35 -55 -25 -13 c-28 -15 -32 -57 -10 -100 8 -15 20 -56 27 -90 15 -73\n4 -144 -33 -220 -23 -46 -118 -152 -136 -152 -6 0 -13 22 -17 49 -4 32 -23 78\n-52 128 -153 261 -169 319 -137 494 6 34 4 37 -35 57 -23 12 -44 22 -46 22 -2\n0 -7 -17 -11 -37 -9 -47 -37 -93 -128 -208 -128 -162 -212 -294 -250 -396 -30\n-80 -39 -61 -41 84 -1 59 -7 113 -12 118 -6 6 -23 9 -39 7 -43 -5 -57 -57 -50\n-178 11 -201 95 -352 230 -417 20 -9 36 -20 36 -25 0 -11 -36 -28 -60 -28 -28\n0 -100 75 -136 141 -30 56 -60 73 -90 49 -51 -44 64 -228 183 -292 27 -15 77\n-32 112 -39 l64 -12 -31 -28 c-37 -33 -105 -46 -156 -29 -25 8 -45 26 -69 63\n-105 158 -151 310 -151 497 0 351 196 659 514 807 166 78 351 101 527 68z\nm154 -448 c26 -19 35 -34 32 -46 -3 -10 5 -37 16 -59 11 -22 32 -66 46 -98\nl26 -59 -31 35 c-50 56 -135 191 -149 235 -7 22 -15 47 -18 55 -3 8 5 4 18\n-10 13 -14 40 -38 60 -53z m-581 -111 c11 -27 40 -79 64 -115 24 -36 46 -71\n49 -78 10 -16 -149 -5 -185 13 -15 8 -35 14 -44 14 -21 0 -64 -38 -64 -56 0\n-7 -10 -18 -21 -25 -12 -6 -42 -27 -67 -45 -24 -19 -47 -33 -49 -30 -11 10 80\n178 173 320 l97 148 13 -48 c7 -27 22 -71 34 -98z m781 10 c24 -8 56 -17 70\n-20 38 -8 68 -88 92 -241 l5 -30 -30 35 c-76 89 -201 270 -186 270 3 0 24 -6\n49 -14z m333 -58 c31 -108 38 -156 39 -258 1 -117 -8 -143 -65 -196 -37 -36\n-69 -54 -93 -54 -13 0 -13 5 4 38 32 64 44 142 38 253 -4 91 -12 131 -42 225\n-6 19 -1 23 32 32 67 18 70 16 87 -40z m-537 -113 l33 -44 -30 -18 c-43 -25\n-80 -104 -80 -168 0 -142 70 -225 188 -225 94 0 154 66 154 170 0 33 2 60 5\n60 3 0 23 -15 43 -34 l38 -34 -39 -63 c-41 -68 -43 -91 -7 -119 19 -16 19 -16\n-4 -50 -116 -172 -604 -265 -904 -172 -61 19 -61 19 -48 74 16 68 -19 99 -90\n80 -20 -6 -36 -9 -36 -7 0 3 8 20 17 40 14 29 21 35 38 30 99 -31 158 -24 208\n23 70 66 85 160 39 252 -12 24 -20 45 -19 46 1 0 19 4 40 7 l37 6 0 -56 c0\n-88 35 -112 117 -78 97 41 213 174 242 278 8 26 16 47 20 47 3 -1 21 -21 38\n-45z m138 -170 c30 -30 31 -39 4 -66 -36 -36 -119 -10 -119 38 0 22 38 53 65\n53 14 0 37 -11 50 -25z m-741 -11 c49 -49 -40 -128 -100 -89 -14 9 -24 25 -24\n39 0 51 88 87 124 50z m755 -94 c39 -11 51 -24 51 -60 0 -61 -65 -94 -141 -71\n-60 18 -92 86 -59 126 15 17 96 20 149 5z m-693 -18 c39 -26 38 -95 -2 -133\n-74 -69 -235 3 -182 82 25 39 151 74 184 51z m-267 -75 c1 -17 -1 -17 -31 -1\n-60 30 -62 36 -21 54 l38 17 6 -26 c4 -14 7 -34 8 -44z m1270 -239 c-36 -62\n-133 -183 -163 -203 -35 -25 -46 14 -25 89 20 71 132 166 196 166 22 0 22 -1\n-8 -52z m-315 -153 c-10 -24 -35 -33 -79 -27 l-39 5 54 17 c70 23 70 23 64 5z\nm-823 -11 c27 -9 49 -20 49 -24 0 -8 -50 -20 -86 -20 -23 0 -41 30 -29 50 8\n13 7 13 66 -6z m-134 -71 c13 -27 28 -41 52 -49 26 -8 30 -12 16 -17 -29 -12\n-39 -8 -100 40 l-60 48 30 6 c17 4 33 7 37 8 3 0 15 -16 25 -36z m778 7 c31\n-16 65 -30 74 -30 30 0 121 -30 121 -40 0 -14 -129 -77 -173 -85 -30 -6 -36\n-5 -32 7 3 8 -3 25 -13 38 -15 19 -24 22 -54 16 -63 -12 -86 -66 -35 -82 17\n-5 15 -8 -18 -20 -21 -7 -51 -10 -67 -7 -27 5 -28 7 -13 23 42 46 -55 96 -109\n57 -14 -10 -17 -23 -14 -45 l5 -32 -47 0 c-60 0 -194 34 -234 60 -17 11 -25\n20 -18 20 8 0 71 28 140 62 l127 61 140 12 c77 7 145 13 151 14 7 0 38 -12 69\n-29z M1029 609 c-41 -41 -3 -129 57 -129 39 0 72 21 89 55 20 43 19 51 -5 75\n-29 29 -112 28 -141 -1z\"/></g></svg>";
+const isDarkTheme = () => {
+  try {
+    return !!(globalThis.matchMedia && globalThis.matchMedia("(prefers-color-scheme: dark)").matches);
+  } catch (e) {
+    return true;
+  }
+};
+const BRAND = BRAND_DARK;
+
+const ICON = {
+  brand: BRAND_DARK,
+  brandLight: BRAND_LIGHT,
+  server: svg(`<rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/><path d="M13 6h5"/><path d="M13 18h5"/>`),
+  refresh: svg(`<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>`),
+  external: svg(`<path d="M7 7h10v10"/><path d="M7 17 17 7"/>`),
+  back: svg(`<path d="m15 18-6-6 6-6"/>`),
+  alert: svg(`<circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>`),
+  cpu: svg(`<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>`),
+  ram: svg(`<rect width="18" height="12" x="3" y="6" rx="2"/><path d="M7 10v4"/><path d="M12 10v4"/><path d="M17 10v4"/>`),
+  disk: svg(`<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>`),
+  gauge: svg(`<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>`),
+  activity: svg(`<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>`),
+  barchart: svg(`<line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/>`),
+  globe: svg(`<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>`),
+  calendar: svg(`<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>`),
+  clock: svg(`<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`),
+  sort: svg(`<path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/>`),
+  chevDown: svg(`<path d="m6 9 6 6 6-6"/>`),
+  chevUp: svg(`<path d="m18 15-6-6-6 6"/>`),
+  link: svg(`<circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M8.59 8.59 15.42 15.42"/>`),
+};
+
+const Icon = (name, size, color, extra) =>
+  h("Icon", {
+    svg: ICON[name] || BRAND,
+    ...extra,
+    tw: `text-[${size || 14}px] size-[${size || 14}px] text-${color || K.muted} shrink-0 ${(extra && extra.tw) || ""}`,
+  });
+
+// ---------------------------------------------------------------------------
+// i18n Dictionary (auto-detected, fallback zh)
+// ---------------------------------------------------------------------------
+
+const I18N = {
+  zh: {
+    onlineBadge: (on, total, off) => (off > 0 ? `${on}/${total} 在线` : `${on} 在线`),
+    onlineNodes: "在线节点",
+    liveBandwidth: "实时带宽",
+    totalTraffic: "累计流量",
+    allGroup: n => `全部 (${n})`,
+    sortBy: "排序",
+    sortWeight: "权重",
+    sortCpu: "CPU",
+    sortRam: "内存",
+    sortNet: "网速 ↓",
+    cores: n => `${n || "?"} 核`,
+    cpu: "CPU",
+    memory: "内存",
+    disk: "磁盘",
+    load: "负载",
+    upRate: "↑ 上行",
+    downRate: "↓ 下行",
+    nowLabel: "现在",
+    peakLabel: (d, u) => `峰值 ↓ ${d}  ↑ ${u}`,
+    outbound: "出站",
+    inbound: "入站",
+    remainTraffic: "剩余流量",
+    tcpConn: "TCP 连接",
+    udpConn: "UDP 连接",
+    network: "网络",
+    ping: "延迟",
+    offline: "离线",
+    online: "在线",
+    uptime: "运行时长",
+    onlineDays: d => `在线 ${d}`,
+    expireDays: d => (d >= 0 ? `到期 ${d} 天` : `已过期 ${Math.abs(d)} 天`),
+    lastSeen: age => `离线 ${age || "未知"}`,
+    trendTitle: "近 4 小时趋势",
+    updating: "更新中…",
+    noLoadData: "暂无足够的历史负载采样数据",
+    noNetData: "暂无足够的历史网络采样数据",
+    noPingData: "该节点暂无 Ping 探测历史记录",
+    nodeSpecs: "节点规格参数",
+    specOs: "操作系统",
+    specCpu: "处理器",
+    specArch: "架构 / 虚拟化",
+    specKernel: "内核版本",
+    specTotalTraffic: "累计总流量",
+    specTrafficQuota: "月流量配额",
+    specUnlimited: "无限制",
+    specSwap: "交换分区",
+    specNone: "未开启",
+    specProcLoad: "进程 / 负载",
+    procs: "进程",
+    setupTitle: "连接 Komari 监控",
+    setupDesc: "请打开看板设置（Inputs），填入你的 Komari Server URL（若开启了私有站点或需查看隐藏节点，可同时填入 API Key）。",
+    invalidUrlTitle: "服务器地址格式有误",
+    connErrTitle: "无法连接 Komari",
+    emptyTitle: "暂无服务器节点",
+    emptyDesc: "当前 Komari 实例未返回任何可见节点。",
+    retry: "重试",
+    refresh: "刷新",
+    openKomari: "打开 Komari",
+    backToList: "返回节点列表",
+    offlineAlertTitle: "Komari · 节点离线",
+    offlineAlertBody: (name, r) => `${name}${r ? " (" + r + ")" : ""} 已离线。`,
+    trayTooltip: (site, on, total, down, up, cpu) =>
+      `${site} · 在线 ${on}/${total} · ↓ ${down} · ↑ ${up} · 平均 CPU ${cpu}`,
+    dlSeries: "下行 (KB/s)",
+    ulSeries: "上行 (KB/s)",
+    cycleMonth: "/月",
+    cycleQuarter: "/季",
+    cycleHalfYear: "/半年",
+    cycleYear: "/年",
+    cycleDays: d => `/${d}天`,
+    infoSuffix: "节点信息",
+    secSystem: "系统",
+    secResource: "资源",
+    secNetwork: "网络",
+    lblStatus: "状态",
+    lblGpu: "显卡",
+    lblVirt: "虚拟化",
+    lblArch: "架构",
+    lblLiveNet: "实时网络",
+    lblLastUpdate: "最近更新",
+    lblPeakSpeed: "峰值速度",
+    lblTotalTraffic: "总流量",
+    tabLoad: "负载",
+    tabPing: "Ping",
+    spanRealtime: "实时",
+    span1h: "1 小时",
+    span4h: "4 小时",
+    span24h: "1 天",
+    loadChartsTitle: "负载图表",
+    pingChartsTitle: "Ping 图表",
+    pingLatency: "延迟",
+    pingLoss: "丢包率",
+    coverage: (a, b) => `覆盖 ${a} - ${b}`,
+    samples: n => `采样 ${n} 个点`,
+    usageSub: "使用率",
+    usedSpaceSub: "已用空间",
+    connTitle: "连接数",
+    connSub: "连接",
+    procTitle: "进程",
+  },
+  en: {
+    onlineBadge: (on, total, off) => (off > 0 ? `${on}/${total} Online` : `${on} Online`),
+    onlineNodes: "Online Nodes",
+    liveBandwidth: "Live Bandwidth",
+    totalTraffic: "Total Traffic",
+    allGroup: n => `All (${n})`,
+    sortBy: "Sort by",
+    sortWeight: "Weight",
+    sortCpu: "CPU",
+    sortRam: "RAM",
+    sortNet: "Net ↓",
+    cores: n => `${n || "?"} Cores`,
+    cpu: "CPU",
+    memory: "Memory",
+    disk: "Disk",
+    load: "Load",
+    upRate: "↑ Upload",
+    downRate: "↓ Download",
+    nowLabel: "Now",
+    peakLabel: (d, u) => `Peak ↓ ${d}  ↑ ${u}`,
+    outbound: "Out",
+    inbound: "In",
+    remainTraffic: "Remaining Traffic",
+    tcpConn: "TCP Conn",
+    udpConn: "UDP Conn",
+    network: "Network",
+    ping: "Ping",
+    offline: "Offline",
+    online: "Online",
+    uptime: "Uptime",
+    onlineDays: d => `Up ${d}`,
+    expireDays: d => (d >= 0 ? `Exp ${d}d` : `Expired ${Math.abs(d)}d`),
+    lastSeen: age => `Last seen ${age || "unknown"}`,
+    trendTitle: "Last 4 Hours Trend",
+    updating: "Updating…",
+    noLoadData: "Not enough historical load samples yet",
+    noNetData: "Not enough historical network samples yet",
+    noPingData: "No ping task history for this node",
+    nodeSpecs: "Node Specifications",
+    specOs: "OS",
+    specCpu: "CPU",
+    specArch: "Arch / Virt",
+    specKernel: "Kernel",
+    specTotalTraffic: "Total Traffic",
+    specTrafficQuota: "Traffic Quota",
+    specUnlimited: "Unlimited",
+    specSwap: "Swap",
+    specNone: "None",
+    specProcLoad: "Processes / Load",
+    procs: "procs",
+    setupTitle: "Connect to Komari",
+    setupDesc: "Open this dashboard's Inputs settings and enter your Komari Server URL (plus an optional API Key for private sites or hidden nodes).",
+    invalidUrlTitle: "Invalid Server URL",
+    connErrTitle: "Couldn't connect to Komari",
+    emptyTitle: "No Servers Found",
+    emptyDesc: "No visible nodes were returned by this Komari instance.",
+    retry: "Retry",
+    refresh: "Refresh",
+    openKomari: "Open Komari",
+    backToList: "Back to servers",
+    offlineAlertTitle: "Komari · Server Offline",
+    offlineAlertBody: (name, r) => `${name}${r ? " (" + r + ")" : ""} is offline.`,
+    trayTooltip: (site, on, total, down, up, cpu) =>
+      `${site} · ${on}/${total} online · ↓ ${down} · ↑ ${up} · Avg CPU ${cpu}`,
+    dlSeries: "Download (KB/s)",
+    ulSeries: "Upload (KB/s)",
+    cycleMonth: "/mo",
+    cycleQuarter: "/qtr",
+    cycleHalfYear: "/6mo",
+    cycleYear: "/yr",
+    cycleDays: d => `/${d}d`,
+    infoSuffix: "Node Info",
+    secSystem: "System",
+    secResource: "Resources",
+    secNetwork: "Network",
+    lblStatus: "Status",
+    lblGpu: "GPU",
+    lblVirt: "Virtualization",
+    lblArch: "Arch",
+    lblLiveNet: "Live Net",
+    lblLastUpdate: "Updated",
+    lblPeakSpeed: "Peak Speed",
+    lblTotalTraffic: "Total Traffic",
+    tabLoad: "Load",
+    tabPing: "Ping",
+    spanRealtime: "Live",
+    span1h: "1H",
+    span4h: "4H",
+    span24h: "1D",
+    loadChartsTitle: "Load Charts",
+    pingChartsTitle: "Ping Charts",
+    pingLatency: "Latency",
+    pingLoss: "Loss Rate",
+    coverage: (a, b) => `${a} - ${b}`,
+    samples: n => `${n} pts`,
+    usageSub: "Usage",
+    usedSpaceSub: "Used Space",
+    connTitle: "Connections",
+    connSub: "Connections",
+    procTitle: "Processes",
+  },
+};
+
+let hostLocale = "";
+
+async function detectHostLocale() {
+  if (hostLocale) return;
+  try {
+    const loc = await $metrix.system("app.locale");
+    if (typeof loc === "string" && loc) hostLocale = loc;
+  } catch (e) {}
+  if (!hostLocale) {
+    try {
+      const langs = await $metrix.system("app.languages");
+      if (Array.isArray(langs) && langs.length) hostLocale = String(langs[0]);
+    } catch (e) {}
+  }
+}
+
+function currentLang() {
+  const candidates = [
+    hostLocale,
+    ...(typeof navigator !== "undefined" && Array.isArray(navigator.languages) ? navigator.languages : []),
+    typeof navigator !== "undefined" ? navigator.language : "",
+  ];
+  for (const c of candidates) {
+    const lc = String(c || "").toLowerCase();
+    if (lc.startsWith("zh")) return "zh";
+    if (lc.startsWith("en")) return "en";
+  }
+  return "zh";
+}
+
+function T() {
+  return I18N[currentLang()];
+}
+
+// ---------------------------------------------------------------------------
+// Formatting helpers
+// ---------------------------------------------------------------------------
+
+const num = (v, d = 0) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : d;
+};
+const str = v => (typeof v === "string" ? v.trim() : "");
+const clampPct = v => Math.max(0, Math.min(100, num(v, 0)));
+const pctText = v => `${Math.round(clampPct(v))}%`;
+const pctFixed = (v, d = 2) => `${clampPct(v).toFixed(d)}%`;
+const levelColor = v => (v >= 90 ? K.down : v >= 70 ? K.warn : K.accent);
+
+function splitBytes(bytes, decimals = 2) {
+  const b = Math.max(0, num(bytes, 0));
+  if (b === 0) return { num: "0", unit: "B" };
+  const units = ["B", "KB", "MB", "GB", "TB", "PB"];
+  const i = Math.min(units.length - 1, Math.floor(Math.log(b) / Math.log(1024)));
+  const val = b / Math.pow(1024, i);
+  const fixed = i === 0 ? val.toFixed(0) : val >= 100 ? val.toFixed(0) : val >= 10 ? val.toFixed(Math.min(decimals, 1)) : val.toFixed(decimals);
+  return { num: fixed, unit: units[i] };
+}
+
+function formatBytes(bytes, decimals = 2) {
+  const s = splitBytes(bytes, decimals);
+  return `${s.num} ${s.unit}`;
+}
+
+function splitRate(bytesPerSec, decimals = 2) {
+  const b = Math.max(0, num(bytesPerSec, 0));
+  if (b < 1024) return { num: String(Math.round(b)), unit: "B/s" };
+  const units = ["B/s", "KB/s", "MB/s", "GB/s", "TB/s"];
+  const i = Math.min(units.length - 1, Math.floor(Math.log(b) / Math.log(1024)));
+  const val = b / Math.pow(1024, i);
+  const fixed = val >= 100 ? val.toFixed(0) : val >= 10 ? val.toFixed(1) : val.toFixed(decimals);
+  return { num: fixed, unit: units[i] };
+}
+
+function formatRate(bytesPerSec, compactMode = false) {
+  const b = Math.max(0, num(bytesPerSec, 0));
+  if (b < 1024) return compactMode ? `${Math.round(b)}B/s` : `${Math.round(b)} B/s`;
+  const units = compactMode ? ["B/s", "K/s", "M/s", "G/s", "T/s"] : ["B/s", "KB/s", "MB/s", "GB/s", "TB/s"];
+  const i = Math.min(units.length - 1, Math.floor(Math.log(b) / Math.log(1024)));
+  const val = b / Math.pow(1024, i);
+  const fixed = val >= 100 ? val.toFixed(0) : val.toFixed(1).replace(/\.0$/, "");
+  return compactMode ? `${fixed}${units[i]}` : `${fixed} ${units[i]}`;
+}
+
+function formatUptimeDays(seconds) {
+  const s = Math.max(0, Math.floor(num(seconds, 0)));
+  if (!s) return "—";
+  const zh = currentLang() === "zh";
+  const days = Math.floor(s / 86400);
+  const hours = Math.floor((s % 86400) / 3600);
+  if (days > 0) return zh ? `${days} 天` : `${days}d`;
+  if (hours > 0) return zh ? `${hours} 小时` : `${hours}h`;
+  return zh ? `${Math.max(1, Math.floor(s / 60))} 分钟` : `${Math.max(1, Math.floor(s / 60))}m`;
+}
+
+function formatUptime(seconds) {
+  const s = Math.max(0, Math.floor(num(seconds, 0)));
+  if (!s) return "—";
+  const days = Math.floor(s / 86400);
+  const hours = Math.floor((s % 86400) / 3600);
+  const mins = Math.floor((s % 3600) / 60);
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${Math.max(1, mins)}m`;
+}
+
+function formatAge(iso) {
+  if (!iso) return "";
+  const t = typeof iso === "number" ? iso : Date.parse(String(iso));
+  if (!Number.isFinite(t)) return "";
+  const sec = Math.max(0, Math.floor((Date.now() - t) / 1000));
+  const zh = currentLang() === "zh";
+  if (sec < 60) return zh ? `${sec}秒前` : `${sec}s ago`;
+  if (sec < 3600) return zh ? `${Math.floor(sec / 60)}分钟前` : `${Math.floor(sec / 60)}m ago`;
+  if (sec < 86400) return zh ? `${Math.floor(sec / 3600)}小时前` : `${Math.floor(sec / 3600)}h ago`;
+  return zh ? `${Math.floor(sec / 86400)}天前` : `${Math.floor(sec / 86400)}d ago`;
+}
+
+function calcDaysLeft(iso) {
+  if (!iso) return null;
+  const ts = Date.parse(String(iso));
+  if (!Number.isFinite(ts) || ts <= 0) return null;
+  return Math.ceil((ts - Date.now()) / 86400000);
+}
+
+function formatPricePill(node) {
+  if (!node || !Number.isFinite(node.price) || node.price <= 0) return "";
+  const t = T();
+  const cur = str(node.currency) || "$";
+  const cycle = num(node.billingCycle, 30);
+  let unit = t.cycleMonth;
+  if (cycle >= 360 && cycle <= 370) unit = t.cycleYear;
+  else if (cycle >= 175 && cycle <= 190) unit = t.cycleHalfYear;
+  else if (cycle >= 85 && cycle <= 95) unit = t.cycleQuarter;
+  else if (cycle !== 30 && cycle !== 31 && cycle > 0) unit = t.cycleDays(cycle);
+  const priceStr = node.price.toFixed(2);
+  return `${cur}${priceStr}${unit}`;
+}
+
+function calcTrafficUsed(status, limitType) {
+  const up = num(status && status.totalUp, 0);
+  const down = num(status && status.totalDown, 0);
+  switch (str(limitType).toLowerCase()) {
+    case "up": return up;
+    case "down": return down;
+    case "min": return Math.min(up, down);
+    case "sum": return up + down;
+    case "max":
+    default:
+      return Math.max(up, down);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+
+let baseURL = "";
+let apiKey = "";
+let offlineNotify = true;
+let refreshSec = 5;
+let trayFormat = "online_total";
+let inputErr = "";
+let siteName = "";
+let serverVersion = "";
+let defaultPingTaskIds = [];
+let nodePingTaskIdsMap = {};
+
+let nodes = [];
+let rateHistory = new Map(); // uuid -> [{ts, up, down}] (up to 36 samples)
+let seededHistory = false;
+let onlineSet = new Set();
+let hadSnapshot = false;
+
+let selectedGroup = localStorage.getItem("komari.group") || "all";
+let sortBy = localStorage.getItem("komari.sort") || "weight";
+if (!["weight", "cpu", "ram", "net"].includes(sortBy)) sortBy = "weight";
+
+let selectedUuid = null;
+let infoExpanded = true;
+let infoSection = localStorage.getItem("komari.infoSec") || "sys";
+if (!["sys", "res", "net"].includes(infoSection)) infoSection = "sys";
+let detailTab = localStorage.getItem("komari.detailTab") || "load";
+if (!["load", "ping"].includes(detailTab)) detailTab = "load";
+let hiddenPingTasks = new Set();
+let detailSpan = localStorage.getItem("komari.detailSpan") || "realtime";
+if (!["realtime", "1h", "4h", "24h"].includes(detailSpan)) detailSpan = "realtime";
+let detailCache = new Map();
+
+let loading = false;
+let loadedAt = 0;
+let error = "";
+let inflight = null;
+
+function parseBaseURL(raw) {
+  const s = str(raw).replace(/\/+$/, "");
+  if (!s) return { url: "", err: "" };
+  try {
+    const u = new URL(s);
+    if (u.protocol !== "https:" && u.protocol !== "http:") {
+      return { url: "", err: "Komari Server URL must use https:// or authorized local http://." };
+    }
+    if (u.hostname === "status.example.com") {
+      return { url: "", err: "" };
+    }
+    return { url: u.origin + u.pathname.replace(/\/+$/, ""), err: "" };
+  } catch (e) {
+    return { url: "", err: "Invalid Komari Server URL. Example: https://status.example.com" };
+  }
+}
+
+function readSecret(name) {
+  try {
+    return str($metrix.secret(name));
+  } catch (e) {
+    return "";
+  }
+}
+
+function redact(msg) {
+  const text = String(msg || "");
+  return (apiKey ? text.split(apiKey).join("•••") : text).slice(0, 220);
+}
+
+function syncInputs(env) {
+  const inputs = (env && env.inputs) || {};
+  const parsed = parseBaseURL(inputs.baseURL);
+  const nextKey = readSecret("apiKey");
+  offlineNotify = inputs.offlineNotify !== false;
+  const nextSec = Math.max(2, num(inputs.refreshInterval, 5));
+  if (nextSec !== refreshSec) {
+    refreshSec = nextSec;
+    try {
+      $metrix.schedule(refreshSec * 1000);
+    } catch (e) {}
+  }
+  const nextTrayFmt = str(inputs.trayFormat) || "online_total";
+  if (["online_total", "total", "online_both", "online"].includes(nextTrayFmt)) {
+    trayFormat = nextTrayFmt;
+  }
+  const sig = `${parsed.url}\n${parsed.err}\n${nextKey}`;
+  if (sig === syncInputs.sig) return;
+  syncInputs.sig = sig;
+  baseURL = parsed.url;
+  inputErr = parsed.err;
+  apiKey = nextKey;
+  siteName = "";
+  serverVersion = "";
+  defaultPingTaskIds = [];
+  nodePingTaskIdsMap = {};
+  nodes = [];
+  rateHistory.clear();
+  seededHistory = false;
+  onlineSet = new Set();
+  hadSnapshot = false;
+  selectedUuid = null;
+  detailCache.clear();
+  error = "";
+  loadedAt = 0;
+}
+
+// ---------------------------------------------------------------------------
+// Komari API (JSON-RPC /api/rpc2 + REST fallback)
+// ---------------------------------------------------------------------------
+
+function authHeaders(extra) {
+  const headers = { Accept: "application/json", ...(extra || {}) };
+  if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+  return headers;
+}
+
+async function fetchJSON(path, options) {
+  const res = await fetch(baseURL + path, {
+    ...(options || {}),
+    headers: authHeaders(options && options.headers),
+  });
+  const text = await res.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch (e) {
+    data = null;
+  }
+  if (!res.ok) {
+    if (res.status === 401) throw new Error(apiKey ? "API key was rejected by Komari (401)." : "Authentication required. Add an API Key in settings.");
+    if (res.status === 403) throw new Error("Access denied by Komari (403).");
+    const msg = data && (data.message || (data.error && data.error.message));
+    throw new Error(redact(msg || `Komari HTTP ${res.status}`));
+  }
+  if (data && data.status === "error") {
+    const msg = str(data.message) || "Komari returned an error.";
+    if (msg.toLowerCase().includes("private site")) {
+      throw new Error("Private site enabled. Please configure an API Key in dashboard inputs.");
+    }
+    throw new Error(redact(msg));
+  }
+  return data;
+}
+
+async function rpcCall(calls) {
+  const payload = calls.map((c, idx) => ({
+    jsonrpc: "2.0",
+    method: c.method,
+    params: c.params || {},
+    id: idx + 1,
+  }));
+  const raw = await fetchJSON("/api/rpc2", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!Array.isArray(raw)) throw new Error("Invalid JSON-RPC batch response.");
+  const byId = new Map(raw.map(item => [item && item.id, item]));
+  return calls.map((_, idx) => byId.get(idx + 1) || null);
+}
+
+function normalizeClient(c) {
+  if (!c || typeof c !== "object" || !str(c.uuid)) return null;
+  return {
+    uuid: str(c.uuid),
+    name: str(c.name) || str(c.uuid).slice(0, 8),
+    region: str(c.region),
+    group: str(c.group),
+    tags: str(c.tags)
+      .split(/[;,]/)
+      .map(s => s.trim())
+      .filter(Boolean),
+    os: str(c.os),
+    kernel: str(c.kernel_version),
+    arch: str(c.arch),
+    virt: str(c.virtualization),
+    cpuName: str(c.cpu_name),
+    cpuCores: num(c.cpu_cores, 0),
+    gpuName: str(c.gpu_name),
+    memTotal: num(c.mem_total, 0),
+    swapTotal: num(c.swap_total, 0),
+    diskTotal: num(c.disk_total, 0),
+    trafficLimit: num(c.traffic_limit, 0),
+    trafficLimitType: str(c.traffic_limit_type) || "max",
+    weight: num(c.weight, 0),
+    price: num(c.price, 0),
+    billingCycle: num(c.billing_cycle, 30),
+    currency: str(c.currency) || "$",
+    hidden: c.hidden === true,
+    expiredAt: c.expired_at ? str(c.expired_at) : "",
+    ipv4: str(c.ipv4),
+    ipv6: str(c.ipv6),
+    version: str(c.version),
+  };
+}
+
+function extractPingList(rawPing, uuid) {
+  if (!rawPing || typeof rawPing !== "object") return [];
+  const entries = Object.entries(rawPing)
+    .map(([k, v]) => {
+      if (!v || typeof v !== "object") return null;
+      return {
+        id: String(k),
+        name: str(v.name) || `#${k}`,
+        latest: num(v.latest, -1),
+        avg: num(v.avg, 0),
+        loss: num(v.loss, 0),
+      };
+    })
+    .filter(Boolean);
+  if (!entries.length) return [];
+
+  const byId = new Map(entries.map(e => [e.id, e]));
+  const preferredIds =
+    (nodePingTaskIdsMap && Array.isArray(nodePingTaskIdsMap[uuid]) && nodePingTaskIdsMap[uuid]) ||
+    (Array.isArray(defaultPingTaskIds) && defaultPingTaskIds.length ? defaultPingTaskIds : null);
+
+  if (preferredIds) {
+    const picked = preferredIds.map(id => byId.get(String(id))).filter(Boolean);
+    if (picked.length > 0) return picked.slice(0, 3);
+  }
+  return entries.slice(0, 3);
+}
+
+function normalizeStatus(s, client) {
+  if (!s || typeof s !== "object") {
+    return {
+      online: false,
+      cpu: 0,
+      ramUsed: 0,
+      ramTotal: client.memTotal,
+      ramPct: 0,
+      swapUsed: 0,
+      swapTotal: client.swapTotal,
+      diskUsed: 0,
+      diskTotal: client.diskTotal,
+      diskPct: 0,
+      load1: 0,
+      load5: 0,
+      load15: 0,
+      netUp: 0,
+      netDown: 0,
+      totalUp: 0,
+      totalDown: 0,
+      tcp: 0,
+      udp: 0,
+      process: 0,
+      uptime: 0,
+      temp: 0,
+      pings: [],
+      updatedAt: "",
+    };
+  }
+  const cpuVal = typeof s.cpu === "object" && s.cpu !== null ? num(s.cpu.usage, 0) : num(s.cpu, 0);
+  const ramUsed = typeof s.ram === "object" && s.ram !== null ? num(s.ram.used, 0) : num(s.ram, 0);
+  const ramTotal =
+    (typeof s.ram === "object" && s.ram !== null ? num(s.ram.total, 0) : num(s.ram_total, 0)) || client.memTotal;
+  const swapUsed = typeof s.swap === "object" && s.swap !== null ? num(s.swap.used, 0) : num(s.swap, 0);
+  const swapTotal =
+    (typeof s.swap === "object" && s.swap !== null ? num(s.swap.total, 0) : num(s.swap_total, 0)) || client.swapTotal;
+  const diskUsed = typeof s.disk === "object" && s.disk !== null ? num(s.disk.used, 0) : num(s.disk, 0);
+  const diskTotal =
+    (typeof s.disk === "object" && s.disk !== null ? num(s.disk.total, 0) : num(s.disk_total, 0)) || client.diskTotal;
+
+  const loadObj = typeof s.load === "object" && s.load !== null ? s.load : null;
+  const load1 = loadObj ? num(loadObj.load1, 0) : num(s.load1 !== undefined ? s.load1 : s.load, 0);
+  const load5 = loadObj ? num(loadObj.load5, 0) : num(s.load5, 0);
+  const load15 = loadObj ? num(loadObj.load15, 0) : num(s.load15, 0);
+
+  const netObj = typeof s.network === "object" && s.network !== null ? s.network : null;
+  const netUp = netObj ? num(netObj.up, 0) : num(s.net_out, 0);
+  const netDown = netObj ? num(netObj.down, 0) : num(s.net_in, 0);
+  const totalUp = netObj ? num(netObj.totalUp !== undefined ? netObj.totalUp : netObj.total_up, 0) : num(s.net_total_up, 0);
+  const totalDown = netObj ? num(netObj.totalDown !== undefined ? netObj.totalDown : netObj.total_down, 0) : num(s.net_total_down, 0);
+
+  const connObj = typeof s.connections === "object" && s.connections !== null ? s.connections : null;
+  const tcp = connObj ? num(connObj.tcp, 0) : num(s.connections, 0);
+  const udp = connObj ? num(connObj.udp, 0) : num(s.connections_udp, 0);
+
+  const updatedAt = str(s.updated_at || s.time || "");
+  let online = false;
+  if (typeof s.online === "boolean") {
+    online = s.online;
+  } else if (typeof s.status === "string") {
+    online = s.status.toLowerCase() === "online";
+  } else if (updatedAt) {
+    const ts = Date.parse(updatedAt);
+    online = Number.isFinite(ts) ? Date.now() - ts < 180e3 : true;
+  } else {
+    online = cpuVal > 0 || ramUsed > 0 || num(s.uptime, 0) > 0;
+  }
+
+  return {
+    online,
+    cpu: clampPct(cpuVal),
+    ramUsed,
+    ramTotal,
+    ramPct: ramTotal > 0 ? clampPct((ramUsed / ramTotal) * 100) : 0,
+    swapUsed,
+    swapTotal,
+    diskUsed,
+    diskTotal,
+    diskPct: diskTotal > 0 ? clampPct((diskUsed / diskTotal) * 100) : 0,
+    load1,
+    load5,
+    load15,
+    netUp,
+    netDown,
+    totalUp,
+    totalDown,
+    tcp,
+    udp,
+    process: num(s.process, 0),
+    uptime: num(s.uptime, 0),
+    temp: num(s.temp, 0),
+    pings: extractPingList(s.ping, client.uuid),
+    updatedAt,
+  };
+}
+
+function applyPublicInfo(pubInfo) {
+  if (!pubInfo || typeof pubInfo !== "object") return;
+  if (str(pubInfo.sitename)) siteName = str(pubInfo.sitename);
+  const ts = pubInfo.theme_settings;
+  if (ts && typeof ts === "object") {
+    if (Array.isArray(ts.homepageMultiPingTaskIds)) {
+      defaultPingTaskIds = ts.homepageMultiPingTaskIds;
+    }
+    if (ts.homepageMultiPingNodeTaskIds && typeof ts.homepageMultiPingNodeTaskIds === "object") {
+      nodePingTaskIdsMap = ts.homepageMultiPingNodeTaskIds;
+    }
+  }
+}
+
+function extractClientList(raw) {
+  if (!raw) return [];
+  const target = raw.data !== undefined && !raw.uuid ? raw.data : raw;
+  if (Array.isArray(target)) return target.map(normalizeClient).filter(Boolean);
+  if (typeof target === "object" && target !== null) {
+    if (target.uuid) {
+      const single = normalizeClient(target);
+      return single ? [single] : [];
+    }
+    return Object.values(target).map(normalizeClient).filter(Boolean);
+  }
+  return [];
+}
+
+async function fetchClusterViaRPC() {
+  const calls = [
+    { method: apiKey ? "admin:listClients" : "common:getNodes", params: {} },
+    { method: "common:getNodesLatestStatus", params: {} },
+    { method: "common:getPublicInfo", params: {} },
+    { method: "common:getVersion", params: {} },
+  ];
+  const res = await rpcCall(calls);
+  let clientRes = res[0];
+  if (clientRes && clientRes.error && apiKey) {
+    const fallback = await rpcCall([{ method: "common:getNodes", params: {} }]);
+    clientRes = fallback[0];
+  }
+  if (!clientRes || clientRes.error) {
+    const errMsg = clientRes && clientRes.error && clientRes.error.message;
+    throw new Error(errMsg || "RPC getNodes failed");
+  }
+  const pubInfo = (res[2] && !res[2].error && res[2].result) || {};
+  const verInfo = (res[3] && !res[3].error && res[3].result) || {};
+  applyPublicInfo(pubInfo);
+  if (verInfo && str(verInfo.version)) serverVersion = str(verInfo.version);
+
+  const clientList = extractClientList(clientRes.result);
+  const statusMap = (res[1] && !res[1].error && res[1].result) || {};
+
+  const onlineArr = Array.isArray(statusMap.online) ? new Set(statusMap.online) : null;
+  const statusEntries = statusMap.data && typeof statusMap.data === "object" ? statusMap.data : statusMap;
+
+  return clientList.map(c => {
+    const rawSt = statusEntries[c.uuid] || null;
+    const st = normalizeStatus(rawSt, c);
+    if (onlineArr) st.online = onlineArr.has(c.uuid);
+    return { ...c, status: st };
+  });
+}
+
+async function fetchClusterViaREST() {
+  const [pubRes, verRes, nodesRes] = await Promise.allSettled([
+    fetchJSON("/api/public"),
+    fetchJSON("/api/version"),
+    apiKey ? fetchJSON("/api/admin/client/list").catch(() => fetchJSON("/api/nodes")) : fetchJSON("/api/nodes"),
+  ]);
+  if (pubRes.status === "fulfilled" && pubRes.value && pubRes.value.data) {
+    applyPublicInfo(pubRes.value.data);
+  }
+  if (verRes.status === "fulfilled" && verRes.value && verRes.value.data && str(verRes.value.data.version)) {
+    serverVersion = str(verRes.value.data.version);
+  }
+  if (nodesRes.status === "rejected") throw nodesRes.reason;
+  const clientList = extractClientList(nodesRes.value);
+
+  const merged = [];
+  for (let i = 0; i < clientList.length; i += 4) {
+    const batch = clientList.slice(i, i + 4);
+    const settled = await Promise.allSettled(
+      batch.map(c => fetchJSON(`/api/recent/${encodeURIComponent(c.uuid)}`))
+    );
+    for (let j = 0; j < batch.length; j++) {
+      const c = batch[j];
+      const r = settled[j];
+      let latest = null;
+      if (r.status === "fulfilled" && r.value) {
+        const arr = Array.isArray(r.value.data) ? r.value.data : Array.isArray(r.value) ? r.value : [];
+        if (arr.length > 0) latest = arr[arr.length - 1];
+      }
+      merged.push({ ...c, status: normalizeStatus(latest, c) });
+    }
+  }
+  return merged;
+}
+
+function checkOfflineTransitions(nextNodes) {
+  const t = T();
+  const nextOnline = new Set();
+  for (const n of nextNodes) {
+    if (n.status.online) {
+      nextOnline.add(n.uuid);
+    } else if (hadSnapshot && offlineNotify && onlineSet.has(n.uuid)) {
+      $metrix.notify(t.offlineAlertTitle, t.offlineAlertBody(n.name, n.region));
+    }
+  }
+  onlineSet = nextOnline;
+  hadSnapshot = true;
+}
+
+const BAR_SLOTS = 60;
+
+function appendRateSamples(list) {
+  const now = Date.now();
+  for (const n of list) {
+    if (!n.status.online) continue;
+    const arr = rateHistory.get(n.uuid) || [];
+    arr.push({ ts: now, up: n.status.netUp, down: n.status.netDown });
+    if (arr.length > BAR_SLOTS) arr.splice(0, arr.length - BAR_SLOTS);
+    rateHistory.set(n.uuid, arr);
+  }
+}
+
+async function seedRecentHistory(list) {
+  const onlineNodes = list.filter(n => n.status.online);
+  for (let i = 0; i < onlineNodes.length; i += 4) {
+    const batch = onlineNodes.slice(i, i + 4);
+    const settled = await Promise.allSettled(
+      batch.map(n => fetchJSON(`/api/records/load?uuid=${encodeURIComponent(n.uuid)}&hours=1`))
+    );
+    for (let j = 0; j < batch.length; j++) {
+      const n = batch[j];
+      const r = settled[j];
+      if (r.status === "fulfilled" && r.value) {
+        const d = r.value.data !== undefined ? r.value.data : r.value;
+        const rawArr = Array.isArray(d && d.records) ? d.records : Array.isArray(d) ? d : [];
+        if (rawArr.length > 0) {
+          const pts = rawArr.slice(-BAR_SLOTS).map(item => ({
+            ts: Date.parse(str(item.time || item.updated_at)) || Date.now(),
+            up: Math.max(0, num(item.net_out !== undefined ? item.net_out : item.network && item.network.up, 0)),
+            down: Math.max(0, num(item.net_in !== undefined ? item.net_in : item.network && item.network.down, 0)),
+          }));
+          // Append the latest live sample from status if newer
+          pts.push({ ts: Date.now(), up: n.status.netUp, down: n.status.netDown });
+          if (pts.length > BAR_SLOTS) pts.splice(0, pts.length - BAR_SLOTS);
+          rateHistory.set(n.uuid, pts);
+        }
+      }
+    }
+  }
+  $metrix.invalidate();
+}
+
+async function loadCluster() {
+  let list;
+  try {
+    list = await fetchClusterViaRPC();
+  } catch (rpcErr) {
+    const msg = String((rpcErr && rpcErr.message) || rpcErr);
+    if (msg.includes("401") || msg.includes("403") || msg.toLowerCase().includes("private site")) {
+      throw rpcErr;
+    }
+    list = await fetchClusterViaREST();
+  }
+  checkOfflineTransitions(list);
+  appendRateSamples(list);
+  nodes = list;
+  if (!seededHistory && list.length > 0) {
+    seededHistory = true;
+    void seedRecentHistory(list);
+  }
+  if (selectedUuid && !nodes.some(n => n.uuid === selectedUuid)) {
+    selectedUuid = null;
+  }
+}
+
+function detailCacheKey(uuid, span) {
+  return `${uuid}:${span || detailSpan}`;
+}
+
+function spanHours(span) {
+  if (span === "24h") return 24;
+  if (span === "4h") return 4;
+  return 1;
+}
+
+async function loadNodeDetail(uuid, span = detailSpan) {
+  if (!baseURL || !uuid) return;
+  const key = detailCacheKey(uuid, span);
+  const prev = detailCache.get(key) || { loadRecords: [], pingRecords: [], pingTasks: [], loadedAt: 0 };
+  detailCache.set(key, { ...prev, loading: true, error: "" });
+  $metrix.invalidate();
+
+  const hrs = spanHours(span);
+  const loadUrl =
+    span === "realtime"
+      ? `/api/recent/${encodeURIComponent(uuid)}`
+      : `/api/records/load?uuid=${encodeURIComponent(uuid)}&hours=${hrs}`;
+  const pingUrl = `/api/records/ping?uuid=${encodeURIComponent(uuid)}&hours=${hrs}`;
+
+  try {
+    const [loadRes, pingRes] = await Promise.allSettled([
+      fetchJSON(loadUrl),
+      fetchJSON(pingUrl),
+    ]);
+
+    let loadRecords = prev.loadRecords;
+    let pingRecords = prev.pingRecords;
+    let pingTasks = prev.pingTasks;
+    let errText = "";
+
+    if (loadRes.status === "fulfilled" && loadRes.value) {
+      const d = loadRes.value.data !== undefined ? loadRes.value.data : loadRes.value;
+      if (Array.isArray(d && d.records)) loadRecords = d.records;
+      else if (Array.isArray(d)) loadRecords = d;
+    } else if (loadRes.status === "rejected") {
+      errText = String((loadRes.reason && loadRes.reason.message) || loadRes.reason);
+    }
+
+    if (pingRes.status === "fulfilled" && pingRes.value) {
+      const d = pingRes.value.data !== undefined ? pingRes.value.data : pingRes.value;
+      if (Array.isArray(d && d.records)) pingRecords = d.records;
+      if (Array.isArray(d && d.tasks)) pingTasks = d.tasks;
+    }
+
+    detailCache.set(key, {
+      loadRecords,
+      pingRecords,
+      pingTasks,
+      loadedAt: Date.now(),
+      loading: false,
+      error: errText,
+    });
+  } catch (e) {
+    detailCache.set(key, {
+      ...prev,
+      loading: false,
+      error: redact((e && e.message) || e),
+    });
+  }
+  $metrix.invalidate();
+}
+
+function refresh() {
+  if (!baseURL) return Promise.resolve();
+  if (inflight) return inflight;
+  loading = true;
+  $metrix.invalidate();
+  inflight = loadCluster()
+    .then(() => {
+      error = "";
+      loadedAt = Date.now();
+      if (selectedUuid) {
+        const ck = detailCacheKey(selectedUuid, detailSpan);
+        const ce = detailCache.get(ck);
+        if (!ce || Date.now() - ce.loadedAt >= 30e3) return loadNodeDetail(selectedUuid, detailSpan);
+      }
+    })
+    .catch(e => {
+      error = redact((e && e.message) || e);
+    })
+    .finally(() => {
+      inflight = null;
+      loading = false;
+      $metrix.invalidate();
+    });
+  return inflight;
+}
+
+const launchRefresh = () => {
+  void refresh();
+};
+
+function selectNode(uuid) {
+  selectedUuid = uuid;
+  const cached = detailCache.get(detailCacheKey(uuid, detailSpan));
+  $metrix.invalidate();
+  if (!cached || Date.now() - cached.loadedAt > 30e3) {
+    return loadNodeDetail(uuid, detailSpan);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Derived Cluster Metrics & Filtering
+// ---------------------------------------------------------------------------
+
+function clusterStats() {
+  const total = nodes.length;
+  let online = 0;
+  let netUp = 0;
+  let netDown = 0;
+  let totalUp = 0;
+  let totalDown = 0;
+  let cpuSum = 0;
+  let ramUsedSum = 0;
+  let ramTotalSum = 0;
+
+  for (const n of nodes) {
+    const st = n.status;
+    if (st.online) {
+      online++;
+      netUp += st.netUp;
+      netDown += st.netDown;
+      cpuSum += st.cpu;
+      ramUsedSum += st.ramUsed;
+      ramTotalSum += st.ramTotal;
+    }
+    totalUp += st.totalUp;
+    totalDown += st.totalDown;
+  }
+
+  const avgCpu = online > 0 ? cpuSum / online : 0;
+  const avgRam = ramTotalSum > 0 ? (ramUsedSum / ramTotalSum) * 100 : 0;
+
+  return { total, online, offline: total - online, netUp, netDown, totalUp, totalDown, avgCpu, avgRam };
+}
+
+function groupOptions() {
+  const t = T();
+  const set = new Set();
+  for (const n of nodes) {
+    if (n.group) set.add(n.group);
+  }
+  const groups = Array.from(set).sort();
+  return [{ label: t.allGroup(nodes.length), value: "all" }].concat(
+    groups.slice(0, 4).map(g => ({ label: g, value: g }))
+  );
+}
+
+function sortOptions() {
+  const t = T();
+  return [
+    { label: t.sortWeight, value: "weight" },
+    { label: t.sortCpu, value: "cpu" },
+    { label: t.sortRam, value: "ram" },
+    { label: t.sortNet, value: "net" },
+  ];
+}
+
+function visibleNodes() {
+  const validGroups = new Set(nodes.map(n => n.group).filter(Boolean));
+  const activeGroup = selectedGroup !== "all" && validGroups.has(selectedGroup) ? selectedGroup : "all";
+  const filtered = activeGroup === "all" ? nodes.slice() : nodes.filter(n => n.group === activeGroup);
+
+  filtered.sort((a, b) => {
+    if (a.status.online !== b.status.online) return a.status.online ? -1 : 1;
+    if (sortBy === "cpu") return b.status.cpu - a.status.cpu;
+    if (sortBy === "ram") return b.status.ramPct - a.status.ramPct;
+    if (sortBy === "net") return b.status.netDown + b.status.netUp - (a.status.netDown + a.status.netUp);
+    if (a.weight !== b.weight) return a.weight - b.weight;
+    return a.name.localeCompare(b.name);
+  });
+  return filtered;
+}
+
+// ---------------------------------------------------------------------------
+// UI Components
+// ---------------------------------------------------------------------------
+
+const bone = (w, hgt, extra) =>
+  h("Box", {
+    ...extra,
+    tw: `w-[${w}px] h-[${hgt}px] rounded bg-surfaceHover shrink-0 ${(extra && extra.tw) || ""}`,
+  });
+
+function IconButton(name, label, onClick, busy, key) {
+  return h(
+    "Column",
+    {
+      key,
+      tw: "w-7 h-7 items-center justify-center rounded-[7px] shrink-0 cursor-pointer hover:bg-surfaceHover pressed:bg-surfacePressed",
+      label,
+      tooltip: label,
+      onClick,
+    },
+    Icon(
+      name,
+      15,
+      K.muted,
+      busy
+        ? {
+            keyframes: {
+              duration: 900,
+              repeat: -1,
+              ease: "linear",
+              frames: [
+                { at: 0, rotate: 0 },
+                { at: 1, rotate: 360 },
+              ],
+            },
+          }
+        : null
+    )
+  );
+}
+
+function Header() {
+  const t = T();
+  const stats = clusterStats();
+  const activeNode = selectedUuid ? nodes.find(n => n.uuid === selectedUuid) : null;
+  const titleText = activeNode
+    ? activeNode.name
+    : siteName || (baseURL ? new URL(baseURL).host : "Komari");
+  const allOnline = stats.total > 0 && stats.offline === 0;
+
+  return h(
+    "Column",
+    { tw: "w-full shrink-0" },
+    h(
+      "Row",
+      { tw: "gap-2 pt-3 pr-3 pb-2.5 pl-4 items-center w-full min-w-0" },
+      activeNode
+        ? IconButton("back", t.backToList, () => {
+            selectedUuid = null;
+            $metrix.invalidate();
+          }, false, "btn-back")
+        : Icon(isDarkTheme() ? "brand" : "brandLight", 18, "text"),
+      activeNode && activeNode.region
+        ? TX(activeNode.region, { tw: "text-[14px] shrink-0 leading-none" })
+        : null,
+      TX(titleText, {
+        tw: "text-sm font-bold truncate min-w-0 shrink",
+      }),
+      activeNode
+        ? h("Badge", {
+            text: activeNode.status.online ? t.online : t.offline,
+            textColor: activeNode.status.online ? K.up : K.down,
+            background: K.hover,
+          })
+        : stats.total > 0
+        ? h("Badge", {
+            text: t.onlineBadge(stats.online, stats.total, stats.offline),
+            textColor: allOnline ? K.up : K.warn,
+            background: K.hover,
+          })
+        : null,
+      h("Spacer"),
+      baseURL ? IconButton("refresh", t.refresh, launchRefresh, loading, "btn-refresh") : null,
+      baseURL
+        ? IconButton("external", t.openKomari, () => $metrix.openURL(baseURL), false, "btn-open")
+        : null
+    ),
+    h("Divider")
+  );
+}
+
+function Problem(title, detail, retry) {
+  const t = T();
+  return h(
+    "Column",
+    { tw: "grow items-center justify-center gap-2 py-8 px-8" },
+    Icon("alert", 22, K.down),
+    TX(title, { tw: "text-sm font-semibold text-center" }),
+    TX(detail, { tw: "text-xs text-textMuted text-center leading-[1.35]" }),
+    retry
+      ? h("Row", { tw: "mt-1.5" }, h("Button", { key: "btn-retry", onClick: launchRefresh }, t.retry))
+      : null
+  );
+}
+
+function SetupGuide() {
+  const t = T();
+  return h(
+    "Column",
+    { tw: "grow items-center justify-center gap-2.5 py-8 px-8" },
+    h(
+      "Column",
+      { tw: "w-11 h-11 rounded-xl bg-accent items-center justify-center mb-1" },
+      Icon("brand", 24, "accentText")
+    ),
+    TX(t.setupTitle, { tw: "text-base font-semibold text-center" }),
+    TX(t.setupDesc, { tw: "text-xs text-textMuted text-center leading-[1.4]" })
+  );
+}
+
+function Banner() {
+  const t = T();
+  if (!error) return null;
+  return h(
+    "Row",
+    { tw: "gap-2 py-2 px-2.5 rounded-lg bg-surfaceHover items-center w-full min-w-0" },
+    Icon("alert", 14, K.down),
+    TX(error, { tw: "text-xs min-w-0 shrink grow leading-[1.3]" }),
+    h(
+      "Row",
+      {
+        tw: "py-0.75 px-2 rounded-[5px] cursor-pointer shrink-0 hover:bg-surfacePressed",
+        label: t.retry,
+        onClick: launchRefresh,
+      },
+      TX(t.retry, { tw: "text-xs font-medium" })
+    )
+  );
+}
+
+function ClusterSummary() {
+  const t = T();
+  const s = clusterStats();
+
+  const segCount = Math.min(Math.max(s.total, 1), 10);
+  const onlineSegs = s.total > 0 ? Math.round((s.online / s.total) * segCount) : 0;
+  const segments = [];
+  for (let i = 0; i < segCount; i++) {
+    const isOn = i < onlineSegs;
+    segments.push(
+      h("Box", {
+        key: `seg-${i}`,
+        tw: `h-1.5 rounded-[2px] grow basis-0 bg-${isOn ? "[#52b788]" : K.down}`,
+      })
+    );
+  }
+
+  const totalRate = s.netUp + s.netDown;
+  const bwSplit = splitRate(totalRate, 2);
+
+  const totalBytes = s.totalUp + s.totalDown;
+  const tfSplit = splitBytes(totalBytes, 2);
+
+  return h(
+    "Grid",
+    { tw: "grid-cols-3 gap-2 w-full min-w-0" },
+    // Card 1: Online Nodes
+    h(
+      "Column",
+      {
+        tw: "justify-between gap-2 py-2.5 px-3 rounded-xl border border-border min-w-0",
+        linearGradient: { from: "#10b98118", to: "surfaceHover", angle: 135 },
+      },
+      h(
+        "Row",
+        { tw: "items-center w-full min-w-0" },
+        TX(t.onlineNodes, { tw: "text-[11px] font-medium text-textMuted truncate min-w-0 shrink grow" }),
+        Icon("server", 12, K.muted)
+      ),
+      h(
+        "Row",
+        { tw: "items-end gap-1 min-w-0" },
+        TX(String(s.online), {
+          tw: "text-xl font-bold tabular-nums leading-none",
+          contentTransition: { numeric: true },
+        }),
+        TX(`/ ${s.total}`, { tw: "text-[11px] font-medium text-textMuted tabular-nums" })
+      ),
+      h("Row", { tw: "gap-0.75 items-center w-full h-3.5" }, segments)
+    ),
+    // Card 2: Live Bandwidth
+    h(
+      "Column",
+      {
+        tw: "justify-between gap-2 py-2.5 px-3 rounded-xl border border-border min-w-0",
+        linearGradient: { from: "#f59e0b18", to: "surfaceHover", angle: 135 },
+        tooltip: `↑ ${formatRate(s.netUp)} · ↓ ${formatRate(s.netDown)}`,
+      },
+      h(
+        "Row",
+        { tw: "items-center w-full min-w-0" },
+        TX(t.liveBandwidth, { tw: "text-[11px] font-medium text-textMuted truncate min-w-0 shrink grow" }),
+        Icon("activity", 12, K.muted)
+      ),
+      h(
+        "Row",
+        { tw: "items-end gap-1 min-w-0" },
+        TX(bwSplit.num, {
+          tw: "text-xl font-bold text-[#e07a2f] tabular-nums leading-none truncate",
+          contentTransition: { numeric: true },
+        }),
+        TX(bwSplit.unit, { tw: "text-[10px] font-semibold text-textMuted shrink-0" })
+      ),
+      TX(`↑ ${formatRate(s.netUp, true)} · ↓ ${formatRate(s.netDown, true)}`, {
+        tw: "text-[10px] text-textMuted tabular-nums truncate w-full",
+      })
+    ),
+    // Card 3: Total Traffic
+    h(
+      "Column",
+      {
+        tw: "justify-between gap-2 py-2.5 px-3 rounded-xl border border-border min-w-0",
+        linearGradient: { from: "#8b5cf618", to: "surfaceHover", angle: 135 },
+        tooltip: `↑ ${formatBytes(s.totalUp, 2)} · ↓ ${formatBytes(s.totalDown, 2)}`,
+      },
+      h(
+        "Row",
+        { tw: "items-center w-full min-w-0" },
+        TX(t.totalTraffic, { tw: "text-[11px] font-medium text-textMuted truncate min-w-0 shrink grow" }),
+        Icon("barchart", 12, K.muted)
+      ),
+      h(
+        "Row",
+        { tw: "items-end gap-1 min-w-0" },
+        TX(tfSplit.num, {
+          tw: "text-xl font-bold tabular-nums leading-none truncate",
+          contentTransition: { numeric: true },
+        }),
+        TX(tfSplit.unit, { tw: "text-[10px] font-semibold text-textMuted shrink-0" })
+      ),
+      TX(`↑ ${formatBytes(s.totalUp, 1)} · ↓ ${formatBytes(s.totalDown, 1)}`, {
+        tw: "text-[10px] text-textMuted tabular-nums truncate w-full",
+      })
+    )
+  );
+}
+
+function FilterToolbar() {
+  const t = T();
+  const groups = groupOptions();
+  const sorts = sortOptions();
+  const activeGroup = groups.some(g => g.value === selectedGroup) ? selectedGroup : "all";
+  return h(
+    "Column",
+    { tw: "gap-2 w-full" },
+    groups.length > 1
+      ? h("Segmented", {
+          key: "seg-group",
+          items: groups,
+          value: activeGroup,
+          onChange: v => {
+            selectedGroup = String(v || "all");
+            localStorage.setItem("komari.group", selectedGroup);
+            $metrix.invalidate();
+          },
+        })
+      : null,
+    h(
+      "Row",
+      { tw: "gap-2 items-center w-full" },
+      Icon("sort", 12, K.muted),
+      TX(t.sortBy, { tw: "text-[11px] text-textMuted shrink-0" }),
+      h("Spacer"),
+      h("Segmented", {
+        key: "seg-sort",
+        items: sorts,
+        value: sortBy,
+        onChange: v => {
+          sortBy = String(v || "weight");
+          localStorage.setItem("komari.sort", sortBy);
+          $metrix.invalidate();
+        },
+      })
+    )
+  );
+}
+
+// Segmented capsule bar (like LuminaPlus resource & quota bars)
+function SegmentedCapsuleBar(pct, count, activeColor, warnHigh = true) {
+  const p = clampPct(pct);
+  const filled = p > 0 ? Math.max(1, Math.round((p / 100) * count)) : 0;
+  const barColor = warnHigh && p >= 90 ? K.down : warnHigh && p >= 75 ? K.warn : activeColor;
+  const cells = [];
+  for (let i = 0; i < count; i++) {
+    cells.push(
+      h("Box", {
+        key: `c-${i}`,
+        tw: `h-1.5 rounded-[1.5px] grow basis-0 bg-${i < filled ? barColor : "border"}`,
+      })
+    );
+  }
+  return h("Row", { tw: "gap-[2.5px] items-center w-full" }, cells);
+}
+
+function ResourceCell(iconName, label, valueText, subText, pct, activeColor) {
+  return h(
+    "Column",
+    { tw: "gap-1 min-w-0 w-full" },
+    h(
+      "Row",
+      { tw: "items-center gap-1 w-full min-w-0" },
+      Icon(iconName, 11, K.muted),
+      TX(label, { tw: "text-[11px] text-textMuted truncate" }),
+      h("Spacer"),
+      TX(valueText, { tw: "text-[11.5px] font-bold tabular-nums shrink-0" })
+    ),
+    subText
+      ? TX(subText, { tw: "text-[10px] text-textMuted tabular-nums truncate leading-none" })
+      : h("Box", { tw: "h-[10px]" }),
+    SegmentedCapsuleBar(pct, 14, activeColor, true)
+  );
+}
+
+function RemainingTrafficRow(node, st) {
+  const t = T();
+  if (!node.trafficLimit || node.trafficLimit <= 0) return null;
+  const used = calcTrafficUsed(st, node.trafficLimitType);
+  const remain = Math.max(0, node.trafficLimit - used);
+  const usedPct = clampPct((used / node.trafficLimit) * 100);
+  const barColor = usedPct >= 95 ? K.down : usedPct >= 75 ? "[#e07a2f]" : "[#52b788]";
+  return h(
+    "Column",
+    { tw: "gap-1.5 pt-1 w-full min-w-0" },
+    h(
+      "Row",
+      { tw: "items-center gap-1.5 w-full min-w-0" },
+      Icon("disk", 11, K.muted),
+      TX(t.remainTraffic, { tw: "text-[11px] text-textMuted shrink-0" }),
+      TX(formatBytes(remain, 2), { tw: "text-[11px] font-bold tabular-nums shrink-0" }),
+      h("Spacer"),
+      TX(`${formatBytes(used, 2)} / ${formatBytes(node.trafficLimit, 2)}`, {
+        tw: "text-[10.5px] text-textMuted tabular-nums truncate",
+      })
+    ),
+    SegmentedCapsuleBar(usedPct, 24, barColor, false)
+  );
+}
+
+function PingStrip(pings) {
+  if (!Array.isArray(pings) || !pings.length) return null;
+  return h(
+    "Grid",
+    { tw: `grid-cols-${Math.min(pings.length, 3)} gap-1.5 w-full min-w-0` },
+    pings.slice(0, 3).map(p => {
+      const ms = p.latest;
+      const loss = Math.max(0, num(p.loss, 0));
+      const msColor = ms < 0 ? K.down : ms >= 160 ? K.warn : "[#52b788]";
+      const lossColor = loss >= 20 ? K.down : loss > 0 ? K.warn : "[#52b788]";
+      return h(
+        "Row",
+        {
+          key: p.id,
+          tw: "items-center gap-1 py-1 px-1.5 rounded-md bg-[#88888812] border border-border min-w-0",
+        },
+        h("Box", { tw: `w-1.5 h-1.5 rounded-full shrink-0 bg-${msColor}` }),
+        TX(p.name, { tw: "text-[10px] text-textMuted truncate min-w-0 shrink grow" }),
+        TX(ms >= 0 ? `${Math.round(ms)}ms` : "—", {
+          tw: `text-[10px] font-bold text-${msColor} tabular-nums shrink-0`,
+        }),
+        TX(`${loss.toFixed(1)}%`, {
+          tw: `text-[9.5px] font-semibold text-${lossColor} tabular-nums shrink-0`,
+        })
+      );
+    })
+  );
+}
+
+function CardSurgeWave(node) {
+  const hist = rateHistory.get(node.uuid) || [{ ts: Date.now(), up: node.status.netUp, down: node.status.netDown }];
+  const sliced = hist.slice(-BAR_SLOTS);
+  let maxRate = 1024;
+  for (const pt of sliced) {
+    if (pt.up > maxRate) maxRate = pt.up;
+    if (pt.down > maxRate) maxRate = pt.down;
+  }
+  const padded = [];
+  for (let i = 0; i < BAR_SLOTS - sliced.length; i++) {
+    padded.push({ ts: 0, up: 0, down: 0 });
+  }
+  for (const pt of sliced) padded.push(pt);
+
+  const halfH = 11;
+  const minDot = 2;
+  const cols = padded.map((item, idx) => {
+    const upH = item.up > 0 ? Math.max(minDot, Math.round((item.up / maxRate) * halfH)) : minDot;
+    const downH = item.down > 0 ? Math.max(minDot, Math.round((item.down / maxRate) * halfH)) : minDot;
+    return h(
+      "Column",
+      { key: `w-${idx}`, tw: "grow basis-0 items-center gap-[1.5px]" },
+      // Top half: Blue ↑ Upload bar growing upward
+      h(
+        "Column",
+        { tw: `h-[${halfH}px] w-full justify-end items-center` },
+        h("Box", {
+          tw: `w-[4px] h-[${upH}px] rounded-full bg-[#3b82f6]`,
+          opacity: item.up > 0 ? 0.92 : 0.28,
+        })
+      ),
+      // Bottom half: Green ↓ Download bar growing downward
+      h(
+        "Column",
+        { tw: `h-[${halfH}px] w-full justify-start items-center` },
+        h("Box", {
+          tw: `w-[4px] h-[${downH}px] rounded-full bg-[#10b981]`,
+          opacity: item.down > 0 ? 0.92 : 0.28,
+        })
+      )
+    );
+  });
+
+  return h("Row", { tw: "items-center gap-[1.5px] w-full" }, cols);
+}
+
+function ServerCard(node) {
+  const t = T();
+  const st = node.status;
+  const upSplit = splitRate(st.netUp, 1);
+  const downSplit = splitRate(st.netDown, 1);
+  const loadPct = clampPct((st.load1 / Math.max(1, node.cpuCores || 1)) * 100);
+  const daysLeft = calcDaysLeft(node.expiredAt);
+  const priceText = formatPricePill(node);
+
+  return h(
+    "Column",
+    {
+      key: `srv-${node.uuid}`,
+      tw: "gap-2.5 py-3 px-3.5 rounded-xl border border-border bg-surfaceHover cursor-pointer w-full min-w-0 hover:bg-surfacePressed",
+      label: `Server ${node.name}`,
+      onClick: () => selectNode(node.uuid),
+    },
+    // 1. Header: Flag/Region + Name + Group + Chart icon
+    h(
+      "Row",
+      { tw: "gap-2 items-center w-full min-w-0" },
+      h("Box", {
+        tw: `w-2 h-2 rounded-full shrink-0 bg-${st.online ? "[#52b788]" : K.down}`,
+      }),
+      node.region
+        ? TX(node.region, { tw: "text-[14px] shrink-0 leading-none" })
+        : null,
+      TX(node.name, { tw: "text-[13.5px] font-bold truncate min-w-0 shrink grow" }),
+      node.group
+        ? h("Badge", { text: node.group, textColor: K.muted, background: "background" })
+        : null,
+      !st.online
+        ? h("Badge", { text: t.offline, textColor: K.down, background: K.press })
+        : null
+    ),
+    // 2. 2x2 Hardware Grid (CPU, RAM, Disk, Load) with segmented bars
+    st.online
+      ? h(
+          "Grid",
+          { tw: "grid-cols-2 gap-x-4 gap-y-2.5 w-full min-w-0" },
+          ResourceCell(
+            "cpu",
+            t.cpu,
+            pctFixed(st.cpu, 2),
+            t.cores(node.cpuCores),
+            st.cpu,
+            "[#4a8af4]"
+          ),
+          ResourceCell(
+            "ram",
+            t.memory,
+            pctFixed(st.ramPct, 2),
+            st.ramTotal > 0 ? `${formatBytes(st.ramUsed, 2)} / ${formatBytes(st.ramTotal, 2)}` : "",
+            st.ramPct,
+            "[#8b5cf6]"
+          ),
+          ResourceCell(
+            "disk",
+            t.disk,
+            pctFixed(st.diskPct, 1),
+            st.diskTotal > 0 ? `${formatBytes(st.diskUsed, 2)} / ${formatBytes(st.diskTotal, 1)}` : "",
+            st.diskPct,
+            "[#e07a2f]"
+          ),
+          ResourceCell(
+            "gauge",
+            t.load,
+            st.load1.toFixed(2),
+            `5m ${st.load5.toFixed(2)} · 15m ${st.load15.toFixed(2)}`,
+            loadPct,
+            "[#52b788]"
+          )
+        )
+      : null,
+    // 3. Compact Bandwidth + Slim Bidirectional Mirrored Wave (Top: Blue ↑ Upload, Bottom: Green ↓ Download)
+    st.online ? h("Divider") : null,
+    st.online
+      ? h(
+          "Column",
+          { tw: "gap-1.5 w-full min-w-0" },
+          // Top compact row: ↑ 上行  55.7 KB/s   |   ↓ 下行  53.2 KB/s
+          h(
+            "Grid",
+            { tw: "grid-cols-2 gap-x-4 w-full min-w-0" },
+            h(
+              "Row",
+              { tw: "items-center justify-between w-full min-w-0" },
+              TX(t.upRate, { tw: "text-[11px] font-semibold text-[#3b82f6] shrink-0" }),
+              h(
+                "Row",
+                { tw: "items-end gap-0.5 shrink-0" },
+                TX(upSplit.num, { tw: "text-[12px] font-bold text-[#3b82f6] tabular-nums leading-none" }),
+                TX(upSplit.unit, { tw: "text-[10px] font-medium text-textMuted" })
+              )
+            ),
+            h(
+              "Row",
+              { tw: "items-center justify-between w-full min-w-0" },
+              TX(t.downRate, { tw: "text-[11px] font-semibold text-[#10b981] shrink-0" }),
+              h(
+                "Row",
+                { tw: "items-end gap-0.5 shrink-0" },
+                TX(downSplit.num, { tw: "text-[12px] font-bold text-[#10b981] tabular-nums leading-none" }),
+                TX(downSplit.unit, { tw: "text-[10px] font-medium text-textMuted" })
+              )
+            )
+          ),
+          // Middle: Slim bidirectional wave
+          CardSurgeWave(node),
+          // Bottom compact row: 出站 612 GB   |   入站 644 GB
+          h(
+            "Grid",
+            { tw: "grid-cols-2 gap-x-4 w-full min-w-0" },
+            h(
+              "Row",
+              { tw: "items-center gap-1 w-full min-w-0" },
+              Icon("globe", 10, "[#3b82f6]"),
+              TX(t.outbound, { tw: "text-[10.5px] text-textMuted shrink-0" }),
+              h("Spacer"),
+              TX(formatBytes(st.totalUp, 2), { tw: "text-[10.5px] font-semibold tabular-nums" })
+            ),
+            h(
+              "Row",
+              { tw: "items-center gap-1 w-full min-w-0" },
+              Icon("globe", 10, "[#10b981]"),
+              TX(t.inbound, { tw: "text-[10.5px] text-textMuted shrink-0" }),
+              h("Spacer"),
+              TX(formatBytes(st.totalDown, 2), { tw: "text-[10.5px] font-semibold tabular-nums" })
+            )
+          )
+        )
+      : null,
+    st.online ? h("Divider") : null,
+    // 4. Remaining Traffic Quota Bar
+    st.online ? RemainingTrafficRow(node, st) : null,
+    // 5. Compact Ping Strip (3 targets)
+    st.online && st.pings.length ? PingStrip(st.pings) : null,
+    // 6. Footer: Uptime Days + Expiry Days + Price Pill + TCP/UDP
+    h(
+      "Row",
+      { tw: "gap-2.5 pt-0.5 items-center w-full min-w-0" },
+      st.online && st.uptime > 0
+        ? h(
+            "Row",
+            { tw: "gap-1 items-center shrink-0" },
+            Icon("clock", 11, K.muted),
+            TX(t.onlineDays(formatUptimeDays(st.uptime)), {
+              tw: "text-[11px] font-medium text-accent tabular-nums",
+            })
+          )
+        : TX(t.lastSeen(formatAge(st.updatedAt)), {
+            tw: "text-[11px] text-textMuted tabular-nums truncate",
+          }),
+      daysLeft !== null
+        ? h(
+            "Row",
+            { tw: "gap-1 items-center shrink-0" },
+            Icon("calendar", 11, K.muted),
+            TX(t.expireDays(daysLeft), {
+              tw: `text-[11px] font-medium text-${daysLeft <= 7 ? K.down : daysLeft <= 30 ? "[#e07a2f]" : "[#52b788]"} tabular-nums`,
+            })
+          )
+        : null,
+      st.online
+        ? TX(`TCP ${st.tcp} · UDP ${st.udp}`, {
+            tw: "text-[10.5px] text-textMuted tabular-nums truncate min-w-0 shrink",
+          })
+        : null,
+      h("Spacer"),
+      priceText
+        ? h(
+            "Row",
+            { tw: "py-0.5 px-2 rounded-full bg-[#10b9811a] shrink-0" },
+            TX(priceText, { tw: "text-[10.5px] font-semibold text-[#52b788] tabular-nums" })
+          )
+        : null
+    )
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Single-Server Detail View & Historical Charts (LuminaPlus-style)
+// ---------------------------------------------------------------------------
+
+const pad2 = n => String(n).padStart(2, "0");
+function hhmm(ts) {
+  const d = new Date(ts);
+  return Number.isFinite(d.getTime()) ? `${pad2(d.getHours())}:${pad2(d.getMinutes())}` : "";
+}
+function hhmmss(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return Number.isFinite(d.getTime()) ? `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}` : "—";
+}
+function mmddhhmm(ts) {
+  const d = new Date(ts);
+  if (!Number.isFinite(d.getTime())) return "";
+  return `${pad2(d.getMonth() + 1)}/${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+
+function parseSampleTime(r) {
+  return Date.parse(str(r && (r.time || r.updated_at)));
+}
+
+function sortedUniquePoints(pts) {
+  pts.sort((a, b) => a.x - b.x);
+  const out = [];
+  for (const p of pts) {
+    if (!out.length || p.x > out[out.length - 1].x) out.push(p);
+  }
+  return out;
+}
+
+function computePeakSpeeds(records) {
+  let maxUp = 0;
+  let maxUpTime = 0;
+  let maxDown = 0;
+  let maxDownTime = 0;
+  for (const r of records || []) {
+    const ts = parseSampleTime(r);
+    const up = num(r.net_out !== undefined ? r.net_out : r.network && r.network.up, 0);
+    const down = num(r.net_in !== undefined ? r.net_in : r.network && r.network.down, 0);
+    if (up >= maxUp) {
+      maxUp = up;
+      if (Number.isFinite(ts)) maxUpTime = ts;
+    }
+    if (down >= maxDown) {
+      maxDown = down;
+      if (Number.isFinite(ts)) maxDownTime = ts;
+    }
+  }
+  const upTimeStr = maxUpTime ? ` (${hhmm(maxUpTime)})` : "";
+  const downTimeStr = maxDownTime ? ` (${hhmm(maxDownTime)})` : "";
+  return `↑ ${formatRate(maxUp, true)}${upTimeStr} · ↓ ${formatRate(maxDown, true)}${downTimeStr}`;
+}
+
+function buildMetricChartsData(records, node) {
+  const cpuPts = [];
+  const ramPts = [];
+  const swapPts = [];
+  const diskPts = [];
+  const netDownPts = [];
+  const netUpPts = [];
+  const tcpPts = [];
+  const udpPts = [];
+  const procPts = [];
+
+  for (const r of records || []) {
+    const ts = parseSampleTime(r);
+    if (!Number.isFinite(ts)) continue;
+
+    const ptLabel = detailSpan === "realtime" ? hhmmss(ts) : mmddhhmm(ts);
+    const cpuVal = clampPct(typeof r.cpu === "object" && r.cpu ? r.cpu.usage : r.cpu);
+    cpuPts.push({ x: ts, y: Number(cpuVal.toFixed(2)), label: ptLabel, valueLabel: `${cpuVal.toFixed(2)}%` });
+
+    const ramUsed = typeof r.ram === "object" && r.ram ? num(r.ram.used, 0) : num(r.ram, 0);
+    const ramTotal = (typeof r.ram === "object" && r.ram ? num(r.ram.total, 0) : num(r.ram_total, 0)) || node.memTotal;
+    const ramPct = ramTotal > 0 ? clampPct((ramUsed / ramTotal) * 100) : 0;
+    ramPts.push({ x: ts, y: Number(ramPct.toFixed(2)), label: ptLabel, valueLabel: `${ramPct.toFixed(1)}% (${formatBytes(ramUsed, 2)})` });
+
+    const swapUsed = typeof r.swap === "object" && r.swap ? num(r.swap.used, 0) : num(r.swap, 0);
+    const swapTotal = (typeof r.swap === "object" && r.swap ? num(r.swap.total, 0) : num(r.swap_total, 0)) || node.swapTotal;
+    const swapPct = swapTotal > 0 ? clampPct((swapUsed / swapTotal) * 100) : 0;
+    swapPts.push({ x: ts, y: Number(swapPct.toFixed(2)), label: ptLabel, valueLabel: `${swapPct.toFixed(1)}% (${formatBytes(swapUsed, 2)})` });
+
+    const diskUsed = typeof r.disk === "object" && r.disk ? num(r.disk.used, 0) : num(r.disk, 0);
+    const diskTotal = (typeof r.disk === "object" && r.disk ? num(r.disk.total, 0) : num(r.disk_total, 0)) || node.diskTotal;
+    const diskPct = diskTotal > 0 ? clampPct((diskUsed / diskTotal) * 100) : 0;
+    diskPts.push({ x: ts, y: Number(diskPct.toFixed(2)), label: ptLabel, valueLabel: `${diskPct.toFixed(2)}% (${formatBytes(diskUsed, 2)})` });
+
+    const down = Math.max(0, num(r.net_in !== undefined ? r.net_in : r.network && r.network.down, 0));
+    const up = Math.max(0, num(r.net_out !== undefined ? r.net_out : r.network && r.network.up, 0));
+    netDownPts.push({ x: ts, y: Number((down / 1024).toFixed(1)), label: ptLabel, valueLabel: formatRate(down) });
+    netUpPts.push({ x: ts, y: Number((up / 1024).toFixed(1)), label: ptLabel, valueLabel: formatRate(up) });
+
+    const tcp = num(r.connections !== undefined && typeof r.connections !== "object" ? r.connections : r.connections && r.connections.tcp, 0);
+    const udp = num(r.connections_udp !== undefined ? r.connections_udp : r.connections && r.connections.udp, 0);
+    tcpPts.push({ x: ts, y: tcp, label: ptLabel, valueLabel: `TCP ${tcp}` });
+    udpPts.push({ x: ts, y: udp, label: ptLabel, valueLabel: `UDP ${udp}` });
+
+    const proc = num(r.process, 0);
+    procPts.push({ x: ts, y: proc, label: ptLabel, valueLabel: `${proc}` });
+  }
+
+  return {
+    cpu: sortedUniquePoints(cpuPts),
+    ram: sortedUniquePoints(ramPts),
+    swap: sortedUniquePoints(swapPts),
+    disk: sortedUniquePoints(diskPts),
+    netDown: sortedUniquePoints(netDownPts),
+    netUp: sortedUniquePoints(netUpPts),
+    tcp: sortedUniquePoints(tcpPts),
+    udp: sortedUniquePoints(udpPts),
+    proc: sortedUniquePoints(procPts),
+  };
+}
+
+const PING_COLORS = ["#ec4899", "#84cc16", "#0ea5e9", "#a855f7", "#f59e0b", "#14b8a6"];
+
+function analyzePingData(records, tasks, nodePings) {
+  const taskMeta = new Map();
+  for (const tk of tasks || []) {
+    if (tk && tk.id !== undefined) {
+      taskMeta.set(String(tk.id), {
+        id: String(tk.id),
+        name: str(tk.name) || `Task #${tk.id}`,
+        avg: num(tk.avg, 0),
+        loss: num(tk.loss, 0),
+      });
+    }
+  }
+  for (const np of nodePings || []) {
+    if (np && np.id !== undefined && !taskMeta.has(String(np.id))) {
+      taskMeta.set(String(np.id), {
+        id: String(np.id),
+        name: str(np.name) || `Task #${np.id}`,
+        avg: num(np.avg || np.latest, 0),
+        loss: num(np.loss, 0),
+      });
+    }
+  }
+
+  const rawByTask = new Map();
+  for (const r of records || []) {
+    const ts = Date.parse(str(r.time));
+    if (!Number.isFinite(ts)) continue;
+    const tid = String(r.task_id !== undefined ? r.task_id : "default");
+    if (!rawByTask.has(tid)) rawByTask.set(tid, []);
+    rawByTask.get(tid).push({ ts, val: num(r.value, -1) });
+  }
+
+  const taskIds = Array.from(new Set([...taskMeta.keys(), ...rawByTask.keys()]));
+  const summaries = [];
+  const latencySeries = [];
+  const lossSeries = [];
+  let minTs = Infinity;
+  let maxTs = -Infinity;
+  let totalPts = 0;
+
+  taskIds.forEach((tid, idx) => {
+    const color = PING_COLORS[idx % PING_COLORS.length];
+    const meta = taskMeta.get(tid) || { id: tid, name: `Ping #${tid}`, avg: 0, loss: 0 };
+    const arr = (rawByTask.get(tid) || []).slice().sort((a, b) => a.ts - b.ts);
+
+    let validSum = 0;
+    let validCnt = 0;
+    let lostCnt = 0;
+    const latPts = [];
+    const lossPts = [];
+    const winSize = 10;
+
+    for (let i = 0; i < arr.length; i++) {
+      const item = arr[i];
+      const alignedTs = Math.round(item.ts / 30000) * 30000;
+      if (alignedTs < minTs) minTs = alignedTs;
+      if (alignedTs > maxTs) maxTs = alignedTs;
+      const lbl = mmddhhmm(alignedTs);
+
+      if (item.val >= 0) {
+        validSum += item.val;
+        validCnt++;
+        latPts.push({
+          x: alignedTs,
+          y: Number(item.val.toFixed(1)),
+          label: lbl,
+          valueLabel: `${item.val.toFixed(1)} ms`,
+        });
+      } else {
+        lostCnt++;
+      }
+
+      // Sliding window packet loss % over up to last winSize samples
+      const startIdx = Math.max(0, i - winSize + 1);
+      let winLost = 0;
+      for (let j = startIdx; j <= i; j++) {
+        if (arr[j].val < 0) winLost++;
+      }
+      const winLossPct = Number(((winLost / (i - startIdx + 1)) * 100).toFixed(1));
+      lossPts.push({
+        x: alignedTs,
+        y: winLossPct,
+        label: lbl,
+        valueLabel: `${winLossPct.toFixed(1)}%`,
+      });
+    }
+
+    const avgMs = validCnt > 0 ? validSum / validCnt : meta.avg;
+    const lossPct = arr.length > 0 ? (lostCnt / arr.length) * 100 : meta.loss;
+    const dedupLat = sortedUniquePoints(latPts);
+    const dedupLoss = sortedUniquePoints(lossPts);
+    if (dedupLat.length > totalPts) totalPts = dedupLat.length;
+
+    summaries.push({
+      id: tid,
+      name: meta.name,
+      color,
+      avgMs,
+      lossPct,
+      hidden: hiddenPingTasks.has(tid),
+    });
+
+    if (!hiddenPingTasks.has(tid)) {
+      if (dedupLat.length > 0) {
+        latencySeries.push({ name: meta.name, color, points: dedupLat });
+      }
+      if (dedupLoss.length > 0) {
+        lossSeries.push({
+          name: meta.name,
+          color,
+          fill: { from: 0.2, to: 0.01 },
+          points: dedupLoss,
+        });
+      }
+    }
+  });
+
+  return { summaries, latencySeries, lossSeries, minTs, maxTs, totalPts };
+}
+
+function InfoRow(label, value, valueColor) {
+  const sVal = String(value);
+  return h(
+    "Row",
+    { key: label, tw: "items-center gap-2 py-1 w-full min-w-0" },
+    TX(label, { tw: "text-[11px] text-textMuted shrink-0 w-20" }),
+    TX(sVal, {
+      tw: `text-[11px] font-semibold ${valueColor ? "text-" + valueColor : ""} truncate min-w-0 shrink grow text-end tabular-nums`,
+      ...(sVal.length > 32 ? { tooltip: sVal } : {}),
+    })
+  );
+}
+
+function CollapsibleNodeInfoCard(node, loadRecords) {
+  const t = T();
+  const st = node.status;
+  const usedTraffic = calcTrafficUsed(st, node.trafficLimitType);
+  const quotaPct = node.trafficLimit > 0 ? clampPct((usedTraffic / node.trafficLimit) * 100) : 0;
+  const peakText =
+    loadRecords && loadRecords.length
+      ? computePeakSpeeds(loadRecords)
+      : `↑ ${formatRate(st.netUp, true)} · ↓ ${formatRate(st.netDown, true)}`;
+
+  const sysRows = [
+    [t.lblStatus, st.online ? t.online : t.offline, st.online ? "[#52b788]" : K.down],
+    ["CPU", node.cpuName ? `${node.cpuName}${node.cpuCores ? ` (x${node.cpuCores})` : ""}` : "—"],
+    [t.specArch, [node.arch, node.virt].filter(Boolean).join(" · ") || "—"],
+    [t.lblGpu, node.gpuName || "None"],
+    [t.specOs, node.os || "—"],
+  ];
+
+  const resRows = [
+    [t.memory, `${formatBytes(st.ramUsed, 2)} / ${formatBytes(st.ramTotal, 2)}`],
+    ["Swap", st.swapTotal > 0 ? `${formatBytes(st.swapUsed, 2)} / ${formatBytes(st.swapTotal, 2)}` : t.specNone],
+    [t.disk, `${formatBytes(st.diskUsed, 2)} / ${formatBytes(st.diskTotal, 2)}`],
+    [t.load, `${st.load1.toFixed(2)} | ${st.load5.toFixed(2)} | ${st.load15.toFixed(2)}`],
+    [t.uptime, formatUptimeDays(st.uptime)],
+  ];
+
+  const netRows = [
+    [t.lblLiveNet, `↑ ${formatRate(st.netUp)} · ↓ ${formatRate(st.netDown)}`],
+    [t.lblLastUpdate, hhmmss(st.updatedAt)],
+    [t.lblPeakSpeed, peakText],
+  ];
+
+  const activeRows = infoSection === "res" ? resRows : infoSection === "net" ? netRows : sysRows;
+
+  const netTrafficFooter =
+    infoSection === "net"
+      ? h(
+          "Column",
+          { tw: "gap-1.5 pt-1 w-full min-w-0" },
+          h("Divider"),
+          h(
+            "Row",
+            { tw: "items-center justify-between w-full min-w-0 pt-0.5" },
+            TX(t.lblTotalTraffic, { tw: "text-[11px] text-textMuted" }),
+            TX(`↑ ${formatBytes(st.totalUp, 2)} · ↓ ${formatBytes(st.totalDown, 2)}`, {
+              tw: "text-[11px] font-bold tabular-nums",
+            })
+          ),
+          node.trafficLimit > 0
+            ? h(
+                "Column",
+                { tw: "gap-1 w-full" },
+                h(
+                  "Box",
+                  { tw: "h-1.5 rounded-full bg-border w-full" },
+                  h("Box", {
+                    tw: "h-1.5 rounded-full",
+                    widthPercent: Math.max(quotaPct, 2),
+                    linearGradient: { from: "#3b82f6", to: "#8b5cf6", angle: 0 },
+                  })
+                ),
+                TX(`${formatBytes(usedTraffic, 2)} / ${formatBytes(node.trafficLimit, 2)}`, {
+                  tw: "text-[10px] text-textMuted tabular-nums",
+                })
+              )
+            : null
+        )
+      : null;
+
+  const secItems = [
+    { label: t.secSystem, value: "sys" },
+    { label: t.secResource, value: "res" },
+    { label: t.secNetwork, value: "net" },
+  ];
+
+  return h(
+    "Column",
+    { tw: "gap-1.5 py-3 px-3.5 rounded-xl border border-border bg-surfaceHover w-full min-w-0" },
+    h(
+      "Row",
+      { tw: "items-center gap-2 w-full min-w-0" },
+      h(
+        "Row",
+        {
+          key: "btn-toggle-info",
+          tw: "items-center gap-1.5 cursor-pointer min-w-0 shrink grow",
+          onClick: () => {
+            infoExpanded = !infoExpanded;
+            $metrix.invalidate();
+          },
+        },
+        Icon("cpu", 13, K.muted),
+        TX(t.infoSuffix, { tw: "text-xs font-bold truncate min-w-0 shrink" }),
+        Icon(infoExpanded ? "chevUp" : "chevDown", 13, K.muted),
+        h("Spacer")
+      ),
+      h("Segmented", {
+        key: "seg-info-sec",
+        items: secItems,
+        value: infoSection,
+        onChange: v => {
+          infoSection = ["sys", "res", "net"].includes(v) ? v : "sys";
+          infoExpanded = true;
+          localStorage.setItem("komari.infoSec", infoSection);
+          $metrix.invalidate();
+        },
+      })
+    ),
+    infoExpanded
+      ? h(
+          "Column",
+          { tw: "gap-0.5 pt-0.5 w-full min-w-0" },
+          ...activeRows.map((r, idx) =>
+            h(
+              "Column",
+              { key: `ir-${infoSection}-${idx}`, tw: "w-full min-w-0" },
+              h("Divider"),
+              InfoRow(r[0], r[1], r[2])
+            )
+          ),
+          netTrafficFooter
+        )
+      : null
+  );
+}
+
+function MetricChartCard({ keyId, iconName, iconColor, tintHex, title, mainValue, subValue, series, yDomain, emptyText }) {
+  const hasPoints = series.some(s => s.points && s.points.length >= 2);
+  return h(
+    "Column",
+    {
+      key: keyId,
+      tw: "gap-2 py-3 px-3.5 rounded-xl border border-border w-full min-w-0",
+      linearGradient: { from: `${tintHex}16`, to: "surfaceHover", angle: 165 },
+    },
+    h(
+      "Row",
+      { tw: "items-start justify-between gap-2 w-full min-w-0" },
+      h(
+        "Row",
+        { tw: "items-center gap-1.5 pt-0.5 shrink-0" },
+        Icon(iconName, 13, iconColor),
+        TX(title, { tw: "text-xs font-bold" })
+      ),
+      h(
+        "Column",
+        { tw: "items-end gap-0.5 min-w-0 shrink" },
+        TX(mainValue, { tw: "text-xs font-bold tabular-nums truncate" }),
+        TX(subValue, { tw: "text-[10.5px] text-textMuted tabular-nums truncate" })
+      )
+    ),
+    hasPoints
+      ? h("Chart", {
+          key: `${keyId}-chart`,
+          type: "area",
+          curve: "monotone",
+          xKind: "time",
+          height: 118,
+          ...(yDomain ? { yDomain } : {}),
+          hover: true,
+          tw: "w-full",
+          series,
+        })
+      : h(
+          "Row",
+          { tw: "h-28 items-center justify-center w-full" },
+          TX(emptyText, { tw: "text-xs text-textMuted" })
+        )
+  );
+}
+
+function LoadChartsGrid(node, entry) {
+  const t = T();
+  const st = node.status;
+  if (!entry || (entry.loading && !entry.loadRecords.length)) {
+    return h(
+      "Column",
+      { tw: "gap-2.5 w-full" },
+      [0, 1, 2].map(i => bone(388, 160, { key: `sk-ch-${i}`, tw: "rounded-xl w-full" }))
+    );
+  }
+
+  const m = buildMetricChartsData(entry.loadRecords, node);
+  const sampleCount = m.cpu.length;
+  const rangeStr =
+    sampleCount >= 2 ? t.coverage(mmddhhmm(m.cpu[0].x), hhmm(m.cpu[sampleCount - 1].x)) : "";
+
+  return h(
+    "Column",
+    { tw: "gap-2.5 w-full min-w-0" },
+    // Section Header with coverage & sample count pills
+    h(
+      "Row",
+      { tw: "items-center gap-1.5 w-full min-w-0" },
+      TX(t.loadChartsTitle, { tw: "text-[13px] font-bold shrink-0" }),
+      h("Spacer"),
+      rangeStr
+        ? h(
+            "Row",
+            { tw: "py-0.5 px-2 rounded-full border border-border bg-surfaceHover shrink-0" },
+            TX(rangeStr, { tw: "text-[10px] font-medium text-textMuted tabular-nums" })
+          )
+        : null,
+      sampleCount > 0
+        ? h(
+            "Row",
+            { tw: "py-0.5 px-2 rounded-full border border-border bg-surfaceHover shrink-0" },
+            TX(t.samples(sampleCount), { tw: "text-[10px] font-medium text-textMuted tabular-nums" })
+          )
+        : null
+    ),
+    // 1. CPU Card (Blue)
+    MetricChartCard({
+      keyId: `mc-cpu-${node.uuid}`,
+      iconName: "cpu",
+      iconColor: "[#3b82f6]",
+      tintHex: "#3b82f6",
+      title: "CPU",
+      mainValue: `${st.cpu.toFixed(2)}%`,
+      subValue: t.usageSub,
+      series: [{ name: "CPU %", color: "#3b82f6", fill: { from: 0.26, to: 0.02 }, points: m.cpu }],
+      emptyText: t.noLoadData,
+    }),
+    // 2. Memory + Swap Card (Purple + Amber)
+    MetricChartCard({
+      keyId: `mc-ram-${node.uuid}`,
+      iconName: "ram",
+      iconColor: "[#8b5cf6]",
+      tintHex: "#8b5cf6",
+      title: t.memory,
+      mainValue: `${formatBytes(st.ramUsed, 2)} / ${formatBytes(st.ramTotal, 2)}`,
+      subValue: `Swap ${formatBytes(st.swapUsed, 2)} / ${formatBytes(st.swapTotal, 2)}`,
+      series: [
+        { name: "RAM %", color: "#8b5cf6", fill: { from: 0.26, to: 0.02 }, points: m.ram },
+        ...(node.swapTotal > 0
+          ? [{ name: "Swap %", color: "#d97706", fill: { from: 0.14, to: 0.01 }, points: m.swap }]
+          : []),
+      ],
+      emptyText: t.noLoadData,
+    }),
+    // 3. Disk Card (Orange)
+    MetricChartCard({
+      keyId: `mc-disk-${node.uuid}`,
+      iconName: "disk",
+      iconColor: "[#e07a2f]",
+      tintHex: "#e07a2f",
+      title: t.disk,
+      mainValue: `${formatBytes(st.diskUsed, 2)} / ${formatBytes(st.diskTotal, 2)}`,
+      subValue: t.usedSpaceSub,
+      series: [{ name: "Disk %", color: "#e07a2f", fill: { from: 0.24, to: 0.02 }, points: m.disk }],
+      emptyText: t.noLoadData,
+    }),
+    // 4. Network Card (Unified MetricChartCard: Blue Upload + Green Download)
+    MetricChartCard({
+      keyId: `mc-net-${node.uuid}`,
+      iconName: "activity",
+      iconColor: "[#10b981]",
+      tintHex: "#10b981",
+      title: t.network,
+      mainValue: `↑ ${formatRate(st.netUp)} / ↓ ${formatRate(st.netDown)}`,
+      subValue: `↑ ${formatBytes(st.totalUp, 1)} · ↓ ${formatBytes(st.totalDown, 1)}`,
+      series: [
+        { name: t.ulSeries, color: "#3b82f6", fill: { from: 0.25, to: 0.02 }, points: m.netUp },
+        { name: t.dlSeries, color: "#10b981", fill: { from: 0.18, to: 0.01 }, points: m.netDown },
+      ],
+      emptyText: t.noNetData,
+    }),
+    // 5. Connections Card (Purple + Blue)
+    MetricChartCard({
+      keyId: `mc-conn-${node.uuid}`,
+      iconName: "link",
+      iconColor: "[#8b5cf6]",
+      tintHex: "#8b5cf6",
+      title: t.connTitle,
+      mainValue: `TCP ${st.tcp} / UDP ${st.udp}`,
+      subValue: t.connSub,
+      series: [
+        { name: "TCP", color: "#8b5cf6", fill: { from: 0.25, to: 0.02 }, points: m.tcp },
+        { name: "UDP", color: "#3b82f6", fill: { from: 0.16, to: 0.01 }, points: m.udp },
+      ],
+      emptyText: t.noLoadData,
+    }),
+    // 6. Processes Card (Gold)
+    MetricChartCard({
+      keyId: `mc-proc-${node.uuid}`,
+      iconName: "gauge",
+      iconColor: "[#ca8a04]",
+      tintHex: "#ca8a04",
+      title: t.procTitle,
+      mainValue: String(st.process),
+      subValue: `${t.load} ${st.load1.toFixed(2)} | ${st.load5.toFixed(2)} | ${st.load15.toFixed(2)}`,
+      series: [{ name: t.procTitle, color: "#ca8a04", fill: { from: 0.24, to: 0.02 }, points: m.proc }],
+      emptyText: t.noLoadData,
+    })
+  );
+}
+
+function PingChartsSection(node, entry) {
+  const t = T();
+  const st = node.status;
+  if (!entry || (entry.loading && !entry.pingRecords.length)) {
+    return bone(388, 220, { tw: "rounded-xl w-full" });
+  }
+  const info = analyzePingData(entry.pingRecords, entry.pingTasks, st.pings);
+  const activeSeries = info.latencySeries;
+  const rangeStr =
+    Number.isFinite(info.minTs) && Number.isFinite(info.maxTs) && info.maxTs > info.minTs
+      ? t.coverage(mmddhhmm(info.minTs), hhmm(info.maxTs))
+      : "";
+
+  // Compact task pills so 3 tasks fit on one line: [● 上海移动 216ms 0.0%]
+  const pills = info.summaries.map(item => {
+    const msColor = item.avgMs >= 160 ? "[#ca8a04]" : "[#52b788]";
+    const lossColor = item.lossPct >= 10 ? K.down : item.lossPct > 0 ? K.warn : "[#52b788]";
+    return h(
+      "Row",
+      {
+        key: `ptask-${item.id}`,
+        tw: "items-center gap-1 py-0.5 px-2 rounded-full border cursor-pointer shrink-0",
+        borderColor: item.hidden ? "border" : item.color,
+        background: item.hidden ? "background" : "surfaceHover",
+        opacity: item.hidden ? 0.45 : 1,
+        onClick: () => {
+          if (hiddenPingTasks.has(item.id)) hiddenPingTasks.delete(item.id);
+          else hiddenPingTasks.add(item.id);
+          $metrix.invalidate();
+        },
+      },
+      h("Box", { tw: `w-1.5 h-1.5 rounded-full shrink-0 bg-[${item.color}]` }),
+      TX(item.name, { tw: "text-[10px] font-semibold shrink-0" }),
+      TX(`${Math.round(item.avgMs)}ms`, { tw: `text-[10px] font-bold text-${msColor} tabular-nums shrink-0` }),
+      TX(`${item.lossPct.toFixed(1)}%`, { tw: `text-[9.5px] font-semibold text-${lossColor} tabular-nums shrink-0` })
+    );
+  });
+
+  return h(
+    "Column",
+    {
+      tw: "gap-2.5 w-full min-w-0",
+    },
+    // Top Header: Ping 图表 + coverage & sample pills
+    h(
+      "Row",
+      { tw: "items-center gap-1.5 w-full min-w-0" },
+      TX(t.pingChartsTitle, { tw: "text-[13px] font-bold shrink-0" }),
+      h("Spacer"),
+      rangeStr
+        ? h(
+            "Row",
+            { tw: "py-0.5 px-2 rounded-full border border-border bg-background shrink-0" },
+            TX(rangeStr, { tw: "text-[10px] font-medium text-textMuted tabular-nums" })
+          )
+        : null,
+      info.totalPts > 0
+        ? h(
+            "Row",
+            { tw: "py-0.5 px-2 rounded-full border border-border bg-background shrink-0" },
+            TX(t.samples(info.totalPts), { tw: "text-[10px] font-medium text-textMuted tabular-nums" })
+          )
+        : null
+    ),
+    // Task Pills Row (wrapping)
+    pills.length
+      ? h("Row", { tw: "flex-wrap gap-1 items-center w-full" }, pills)
+      : null,
+    // Chart
+    activeSeries.length > 0 && activeSeries.some(s => s.points.length >= 2)
+      ? h("Chart", {
+          key: `chart-${node.uuid}-ping`,
+          type: "line",
+          curve: "monotone",
+          xKind: "time",
+          height: 175,
+          hover: true,
+          tw: "w-full",
+          series: activeSeries,
+        })
+      : h(
+          "Row",
+          { tw: "h-36 items-center justify-center w-full" },
+          TX(t.noPingData, { tw: "text-xs text-textMuted" })
+        )
+  );
+}
+
+function DetailView(node) {
+  const t = T();
+  const entry = detailCache.get(detailCacheKey(node.uuid, detailSpan));
+  const loadRecords = entry ? entry.loadRecords : [];
+
+  const tabItems = [
+    { label: t.tabLoad, value: "load" },
+    { label: t.tabPing, value: "ping" },
+  ];
+  const spanItems = [
+    { label: t.spanRealtime, value: "realtime" },
+    { label: t.span1h, value: "1h" },
+    { label: t.span4h, value: "4h" },
+    { label: t.span24h, value: "24h" },
+  ];
+
+  return h(
+    "Scroll",
+    { tw: "grow min-h-0 w-full" },
+    h(
+      "Column",
+      { tw: "gap-3 pt-3.5 pr-4 pb-4 pl-4 w-full min-w-0" },
+      Banner(),
+      CollapsibleNodeInfoCard(node, loadRecords),
+      // Switcher Toolbar: Load/Ping + Realtime/1h/4h/1d
+      h(
+        "Row",
+        { tw: "items-center gap-2 w-full min-w-0" },
+        h("Segmented", {
+          key: "seg-detail-tab",
+          items: tabItems,
+          value: detailTab,
+          onChange: v => {
+            detailTab = v === "ping" ? "ping" : "load";
+            localStorage.setItem("komari.detailTab", detailTab);
+            $metrix.invalidate();
+          },
+        }),
+        h("Spacer"),
+        h("Segmented", {
+          key: "seg-detail-span",
+          items: spanItems,
+          value: detailSpan,
+          onChange: v => {
+            const nextSpan = String(v || "realtime");
+            detailSpan = nextSpan;
+            localStorage.setItem("komari.detailSpan", detailSpan);
+            const cached = detailCache.get(detailCacheKey(node.uuid, detailSpan));
+            $metrix.invalidate();
+            if (!cached || Date.now() - cached.loadedAt > 30e3) {
+              return loadNodeDetail(node.uuid, detailSpan);
+            }
+          },
+        })
+      ),
+      detailTab === "ping" ? PingChartsSection(node, entry) : LoadChartsGrid(node, entry)
+    )
+  );
+}
+
+function Skeleton() {
+  return h(
+    "Column",
+    { tw: "gap-3.5 pt-3.5 pr-4 pb-4 pl-4 w-full" },
+    h(
+      "Grid",
+      { tw: "grid-cols-3 gap-2 w-full" },
+      [0, 1, 2].map(i => bone(120, 74, { key: `sk-top-${i}`, tw: "rounded-xl w-full" }))
+    ),
+    bone(388, 28, { tw: "rounded-md w-full" }),
+    [0, 1, 2].map(i => bone(388, 190, { key: `sk-${i}`, tw: "rounded-xl w-full" }))
+  );
+}
+
+function Body() {
+  const t = T();
+  if (!baseURL) return inputErr ? Problem(t.invalidUrlTitle, inputErr, false) : SetupGuide();
+  if (!nodes.length) {
+    return error
+      ? Problem(t.connErrTitle, error, true)
+      : loading || !loadedAt
+      ? Skeleton()
+      : Problem(t.emptyTitle, t.emptyDesc, true);
+  }
+  const activeNode = selectedUuid ? nodes.find(n => n.uuid === selectedUuid) : null;
+  if (activeNode) return DetailView(activeNode);
+
+  const list = visibleNodes();
+  return h(
+    "Scroll",
+    { tw: "grow min-h-0 w-full" },
+    h(
+      "Column",
+      { tw: "gap-3 pt-3.5 pr-4 pb-4 pl-4 w-full min-w-0" },
+      Banner(),
+      ClusterSummary(),
+      FilterToolbar(),
+      h(
+        "Column",
+        { tw: "gap-2.5 w-full min-w-0" },
+        list.map(ServerCard)
+      )
+    )
+  );
+}
+
+function panelTree() {
+  return h(
+    "Column",
+    {
+      preferredWidth: W,
+      preferredHeight: 620,
+      safeArea: true,
+      tw: "size-full text-[13px] text-text min-w-0 min-h-0",
+      shortcuts: {
+        "CmdOrCtrl+R": launchRefresh,
+        Escape: () => {
+          if (selectedUuid) {
+            selectedUuid = null;
+            $metrix.invalidate();
+          }
+        },
+      },
+    },
+    Header(),
+    Body()
+  );
+}
+
+function trayTree() {
+  const t = T();
+  const s = clusterStats();
+  const hasData = nodes.length > 0;
+  let title = "";
+  if (hasData) {
+    const totalBw = formatRate(s.netUp + s.netDown, true);
+    if (trayFormat === "total") {
+      title = totalBw;
+    } else if (trayFormat === "online") {
+      title = `${s.online}/${s.total}`;
+    } else if (trayFormat === "online_both") {
+      title = `${s.online}/${s.total} · ↑${formatRate(s.netUp, true)} ↓${formatRate(s.netDown, true)}`;
+    } else {
+      title = `${s.online}/${s.total} · ${totalBw}`;
+    }
+  }
+  const tooltip = hasData
+    ? t.trayTooltip(siteName || "Komari", s.online, s.total, formatRate(s.netDown), formatRate(s.netUp), pctText(s.avgCpu))
+    : baseURL || "Komari";
+
+  return {
+    icon: "data:image/svg+xml," + encodeURIComponent(BRAND),
+    iconTemplate: true,
+    title,
+    tooltip,
+    error: error || inputErr,
+    menu: [
+      { label: t.refresh, onClick: launchRefresh, disabled: !baseURL },
+      { label: t.openKomari, onClick: () => { if (baseURL) $metrix.openURL(baseURL); }, disabled: !baseURL },
+    ],
+  };
+}
+
+export default {
+  async scheduled(env) {
+    syncInputs(env);
+    try {
+      $metrix.schedule(refreshSec * 1000);
+    } catch (e) {}
+    await detectHostLocale();
+    await refresh();
+  },
+
+  render(env) {
+    syncInputs(env);
+    return { tray: trayTree(), panel: panelTree() };
+  },
+
+  event(name, payload) {
+    if (
+      name === "lifecycle" &&
+      payload &&
+      payload.type === "expand" &&
+      baseURL &&
+      !inflight &&
+      Date.now() - loadedAt > 30e3
+    ) {
+      launchRefresh();
+    }
+  },
+};
+  ]]></script>
+</bar>
