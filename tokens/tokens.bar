@@ -1,0 +1,2700 @@
+<bar protocol-version="0"
+     category="ai"
+     version="1.0.0"
+     icon="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDY0IDY0IiBmaWxsPSJub25lIj48ZyBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiPjxwYXRoIGQ9Ik0xNCAxNWgzNiIvPjxwYXRoIGQ9Ik0zMiAxNXYzNCIvPjxwYXRoIGQ9Ik0yMiAyN2gyMCIgb3BhY2l0eT0iMC43NSIvPjxwYXRoIGQ9Ik0yNC41IDM3aDE1IiBvcGFjaXR5PSIwLjUiLz48cGF0aCBkPSJNMjcgNDdoMTAiIG9wYWNpdHk9IjAuMyIvPjwvZz48L3N2Zz4="
+     description="Monitor AI coding token usage, daily spend, model breakdown, and multi-device submissions on Tokens (tokens.ci)."
+     license="AGPL-3.0-only"
+     homepage="https://tokens.ci"
+     id="tokens"
+     title="Tokens"
+     refresh="5m"
+     material="solid">
+
+  <permissions>
+    <network origin="{{ inputs.baseURL }}" />
+    <network origin="https://avatars.githubusercontent.com" />
+    <file path="{{ inputs.credentials }}" />
+  </permissions>
+
+  <inputs>
+    <input name="username"
+           type="string"
+           label="GitHub Username"
+           placeholder="Auto-detect from ~/.config/tokens/credentials.json"
+           help="Optional when logged in with the Tokens CLI (`tokens login`). Enter any GitHub username to view a public profile." />
+    <input name="token"
+           type="secret"
+           label="Read or API Token"
+           help="Optional. A read token (`tkr_…`) unlocks a private profile; a personal API token (`tt_…`) unlocks unmasked device names." />
+    <input name="trayFormat"
+           type="select"
+           label="Tray Display"
+           default="today_cost"
+           help="Metrics displayed in the macOS menu bar / system tray.">
+      <option value="today_cost" label="14.2M · $8.40 (Today Tokens + Today Cost - Default)" />
+      <option value="today_rank" label="14.2M · #38 (Today Tokens + Rank)" />
+      <option value="total_rank" label="1.2B · #38 (Total Tokens + Rank)" />
+      <option value="total_cost" label="1.2B · $420 (Total Tokens + Total Cost)" />
+      <option value="today_only" label="14.2M (Today Tokens Only)" />
+      <option value="cost_only" label="$8.40 (Today Cost Only)" />
+    </input>
+    <input name="baseURL"
+           type="string"
+           label="Tokens Server URL"
+           default="https://tokens.ci"
+           required="true"
+           help="Base URL of the Tokens instance (default: `https://tokens.ci`)." />
+    <input name="credentials"
+           type="file"
+           label="Tokens CLI Credentials"
+           default="~/.config/tokens/credentials.json"
+           help="Path to the credentials file written by `tokens login` (`~/.config/tokens/credentials.json`)." />
+  </inputs>
+
+  <docs><![CDATA[Reads your Tokens account automatically from ~/.config/tokens/credentials.json after running `tokens login`. You can also enter any GitHub username in Inputs to view a public profile without signing in, or paste a Read Token (tkr_…) into Read or API Token to view a private profile.]]></docs>
+
+  <script apis="app localStorage match-media shell"><![CDATA[
+// Tokens (tokens.ci) AI coding usage dashboard for Metrix.Bar.
+
+const h = (type, props, ...children) => ({
+  type,
+  props: props || {},
+  children: children.flat().filter(c => c !== null && c !== undefined && c !== false),
+});
+const TX = (text, props) => h("Text", props, String(text));
+
+const K = {
+  muted: "textMuted",
+  hover: "surfaceHover",
+  press: "surfacePressed",
+  line: "border",
+  up: "success",
+  warn: "warning",
+  down: "danger",
+  accent: "accent",
+};
+const W = 420;
+
+const svg = paths =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+
+// Official Tokens brand mark: public/brand/tokens-mark.svg
+const BRAND = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 64 64" fill="none"><g stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"><path d="M14 15h36"/><path d="M32 15v34"/><path d="M22 27h20" opacity="0.75"/><path d="M24.5 37h15" opacity="0.5"/><path d="M27 47h10" opacity="0.3"/></g></svg>`;
+
+const ICON = {
+  brand: BRAND,
+  refresh: svg(`<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>`),
+  external: svg(`<path d="M7 7h10v10"/><path d="M7 17 17 7"/>`),
+  back: svg(`<path d="m15 18-6-6 6-6"/>`),
+  alert: svg(`<circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>`),
+  check: svg(`<path d="M20 6 9 17l-5-5"/>`),
+  sun: svg(`<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>`),
+  zap: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h8l-1 8 10-12h-8l1-8z"/></svg>`,
+  clock: svg(`<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`),
+  flame: svg(`<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>`),
+  coins: svg(`<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>`),
+  calendar: svg(`<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>`),
+  upload: svg(`<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>`),
+  pie: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2.05V13h10.95A10.003 10.003 0 0 1 12 22C6.477 22 2 17.523 2 12c0-5.185 3.947-9.449 9-9.95Zm2 0A10.003 10.003 0 0 1 21.95 11H13V2.05Z"/></svg>`,
+  grid: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="4.5" height="4.5" rx="1"/><rect x="9.75" y="3" width="4.5" height="4.5" rx="1"/><rect x="16.5" y="3" width="4.5" height="4.5" rx="1"/><rect x="3" y="9.75" width="4.5" height="4.5" rx="1"/><rect x="9.75" y="9.75" width="4.5" height="4.5" rx="1"/><rect x="16.5" y="9.75" width="4.5" height="4.5" rx="1"/><rect x="3" y="16.5" width="4.5" height="4.5" rx="1"/><rect x="9.75" y="16.5" width="4.5" height="4.5" rx="1"/><rect x="16.5" y="16.5" width="4.5" height="4.5" rx="1"/></svg>`,
+  layers: svg(`<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>`),
+  cpu: svg(`<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>`),
+  laptop: svg(`<path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/>`),
+  chart: svg(`<line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/>`),
+  lock: svg(`<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>`),
+  trophy: svg(`<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>`),
+  chevRight: svg(`<path d="m9 18 6-6-6-6"/>`),
+  chevDown: svg(`<path d="m6 9 6 6 6-6"/>`),
+  chevUp: svg(`<path d="m18 15-6-6-6 6"/>`),
+};
+
+const Icon = (name, size, color, extra) =>
+  h("Icon", {
+    svg: ICON[name] || BRAND,
+    ...extra,
+    tw: `text-[${size || 14}px] size-[${size || 14}px] text-${color || K.muted} shrink-0 ${(extra && extra.tw) || ""}`,
+  });
+
+// ---------------------------------------------------------------------------
+// Client Display Names & Brand Colors (from missuo/tokens web/src/lib/constants.ts)
+// ---------------------------------------------------------------------------
+
+const CLIENT_NAMES = {
+  opencode: "OpenCode",
+  claude: "Claude Code",
+  codex: "Codex CLI",
+  copilot: "Copilot",
+  gemini: "Gemini CLI",
+  cursor: "Cursor",
+  amp: "Amp",
+  codebuff: "Codebuff",
+  freebuff: "Freebuff",
+  droid: "Droid",
+  openclaw: "OpenClaw",
+  hermes: "Hermes Agent",
+  pi: "Pi",
+  kimi: "Kimi",
+  qwen: "Qwen",
+  roocode: "Roo Code",
+  kilocode: "Kilo",
+  kilo: "Kilo CLI",
+  mux: "Mux",
+  kiro: "Kiro",
+  crush: "Crush",
+  goose: "Goose",
+  antigravity: "Antigravity",
+  "antigravity-cli": "Antigravity CLI",
+  zed: "Zed Agent",
+  trae: "Trae",
+  warp: "Warp",
+  cline: "Cline",
+  synthetic: "Synthetic",
+  gjc: "Gajae Code",
+  "9router": "9Router",
+  grok: "Grok Build",
+  jcode: "Jcode",
+  commandcode: "Command Code",
+  micode: "MiMo Code",
+  junie: "Junie",
+  zcode: "ZCode",
+  opencodereview: "OpenCodeReview",
+  codebuddy: "CodeBuddy",
+  workbuddy: "WorkBuddy",
+  "devin-cli": "Devin CLI",
+  "devin-desktop": "Devin Desktop",
+  reasonix: "Reasonix",
+  fx: "Fx",
+  senpi: "Senpi",
+  augment: "Augment Code",
+  kimchi: "Kimchi",
+  "prime-agent": "Prime Agent",
+  cherrystudio: "Cherry Studio",
+  dsh: "DeepSeek Harness",
+  mcode: "MiniMax Code",
+  omp: "Oh My Pi",
+  lmstudio: "LM Studio",
+  unsloth: "Unsloth",
+  hindsight: "Hindsight",
+  "craft-agent": "Craft Agent",
+};
+
+const CLIENT_COLORS = {
+  opencode: "#00A8E8",
+  claude: "#f97316",
+  codex: "#10B981",
+  copilot: "#6e7681",
+  gemini: "#8b5cf6",
+  cursor: "#22c55e",
+  amp: "#EC4899",
+  codebuff: "#7C3AED",
+  freebuff: "#38BDF8",
+  droid: "#a1a1aa",
+  openclaw: "#EF4444",
+  hermes: "#EAB308",
+  pi: "#6366F1",
+  kimi: "#8B5CF6",
+  qwen: "#1A73E8",
+  roocode: "#10B981",
+  kilocode: "#F59E0B",
+  kilo: "#F59E0B",
+  mux: "#64748b",
+  kiro: "#00A67D",
+  crush: "#DC2626",
+  goose: "#64B4DC",
+  antigravity: "#6366F1",
+  "antigravity-cli": "#6366F1",
+  zed: "#3b82f6",
+  trae: "#00BFA5",
+  warp: "#01A4A4",
+  cline: "#5B8DEF",
+  synthetic: "#4ADE80",
+  gjc: "#FF6B6B",
+  "9router": "#0EA5E9",
+  grok: "#94a3b8",
+  jcode: "#F59E0B",
+  commandcode: "#A855F7",
+  micode: "#FF6900",
+  junie: "#7B61FF",
+  zcode: "#3B5BDB",
+  opencodereview: "#FF6A00",
+  codebuddy: "#00A4FF",
+  workbuddy: "#2563EB",
+  "devin-cli": "#64748b",
+  "devin-desktop": "#64748b",
+  reasonix: "#6366F1",
+  fx: "#0070F3",
+  senpi: "#2F6F63",
+  augment: "#9333EA",
+  kimchi: "#14B8A6",
+  "prime-agent": "#6C63FF",
+  cherrystudio: "#FA7298",
+  dsh: "#4D6BFE",
+  mcode: "#F04438",
+  omp: "#E11D48",
+  lmstudio: "#6C5CE7",
+  unsloth: "#58CC02",
+  hindsight: "#0891B2",
+  "craft-agent": "#F97316",
+};
+
+// Official client logo paths served from tokens.ci/clients/* (mirrors SOURCE_LOGOS in constants.ts)
+const CLIENT_LOGOS = {
+  opencode: "/clients/client-opencode.png",
+  claude: "/clients/client-claude.jpg",
+  codex: "/clients/client-openai.jpg",
+  copilot: "/clients/client-copilot.jpg",
+  gemini: "/clients/client-gemini.png",
+  cursor: "/clients/client-cursor.jpg",
+  amp: "/clients/client-amp.png",
+  codebuff: "/clients/client-codebuff.png",
+  freebuff: "/clients/client-freebuff.png",
+  droid: "/clients/client-droid.png",
+  openclaw: "/clients/client-openclaw.jpg",
+  hermes: "/clients/client-hermes.png",
+  pi: "/clients/client-pi.png",
+  kimi: "/clients/client-kimi.png",
+  qwen: "/clients/client-qwen.png",
+  roocode: "/clients/client-roocode.png",
+  kilocode: "/clients/client-kilocode.png",
+  kilo: "/clients/client-generic.svg",
+  mux: "/clients/client-mux.png",
+  kiro: "/clients/client-kiro.jpg",
+  crush: "/clients/client-crush.png",
+  goose: "/clients/client-goose.png",
+  antigravity: "/clients/client-antigravity.png",
+  "antigravity-cli": "/clients/client-antigravity.png",
+  zed: "/clients/client-zed.webp",
+  trae: "/clients/client-trae.png",
+  warp: "/clients/client-warp.png",
+  cline: "/clients/client-cline.png",
+  synthetic: "/clients/client-synthetic.png",
+  gjc: "/clients/client-generic.svg",
+  "9router": "/clients/client-generic.svg",
+  grok: "/clients/client-grok.png",
+  jcode: "/clients/client-jcode.png",
+  commandcode: "/clients/client-commandcode.png",
+  micode: "/clients/client-micode.jpg",
+  junie: "/clients/client-junie.png",
+  zcode: "/clients/client-zcode.png",
+  opencodereview: "/clients/client-opencodereview.png",
+  codebuddy: "/clients/client-codebuddy.png",
+  workbuddy: "/clients/client-workbuddy.png",
+  "devin-cli": "/clients/client-devin.jpg",
+  "devin-desktop": "/clients/client-devin.jpg",
+  reasonix: "/clients/client-generic.svg",
+  fx: "/clients/client-fx.png",
+  senpi: "/clients/client-senpi.png",
+  augment: "/clients/client-augment.png",
+  kimchi: "/clients/client-kimchi.png",
+  "prime-agent": "/clients/client-prime-agent.jpg",
+  cherrystudio: "/clients/client-cherrystudio.png",
+  dsh: "/clients/client-dsh.png",
+  mcode: "/clients/client-mcode.jpg",
+  omp: "/clients/client-omp.png",
+  lmstudio: "/clients/client-lmstudio.png",
+  unsloth: "/clients/client-unsloth.png",
+  hindsight: "/clients/client-hindsight.png",
+  "craft-agent": "/clients/client-craft-agent.png",
+  orca: "/clients/client-orca.png",
+  paseo: "/clients/client-paseo.svg",
+};
+
+// Model provider monochrome brand SVG paths (mirrors web/src/lib/modelIcons.ts & brandIcons.generated.ts)
+const MODEL_BRAND_PATHS = {
+  claude: `<path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z"/>`,
+  openai: `<path d="M9.205 8.658v-2.26c0-.19.072-.333.238-.428l4.543-2.616c.619-.357 1.356-.523 2.117-.523 2.854 0 4.662 2.212 4.662 4.566 0 .167 0 .357-.024.547l-4.71-2.759a.797.797 0 00-.856 0l-5.97 3.473zm10.609 8.8V12.06c0-.333-.143-.57-.429-.737l-5.97-3.473 1.95-1.118a.433.433 0 01.476 0l4.543 2.617c1.309.76 2.189 2.378 2.189 3.948 0 1.808-1.07 3.473-2.76 4.163zM7.802 12.703l-1.95-1.142c-.167-.095-.239-.238-.239-.428V5.899c0-2.545 1.95-4.472 4.591-4.472 1 0 1.927.333 2.712.928L8.23 5.067c-.285.166-.428.404-.428.737v6.898zM12 15.128l-2.795-1.57v-3.33L12 8.658l2.795 1.57v3.33L12 15.128zm1.796 7.23c-1 0-1.927-.332-2.712-.927l4.686-2.712c.285-.166.428-.404.428-.737v-6.898l1.974 1.142c.167.095.238.238.238.428v5.233c0 2.545-1.974 4.472-4.614 4.472zm-5.637-5.303l-4.544-2.617c-1.308-.761-2.188-2.378-2.188-3.948A4.482 4.482 0 014.21 6.327v5.423c0 .333.143.571.428.738l5.947 3.449-1.95 1.118a.432.432 0 01-.476 0zm-.262 3.9c-2.688 0-4.662-2.021-4.662-4.519 0-.19.024-.38.047-.57l4.686 2.71c.286.167.571.167.856 0l5.97-3.448v2.26c0 .19-.07.333-.237.428l-4.543 2.616c-.619.357-1.356.523-2.117.523zm5.899 2.83a5.947 5.947 0 005.827-4.756C22.287 18.339 24 15.84 24 13.296c0-1.665-.713-3.282-1.998-4.448.119-.5.19-.999.19-1.498 0-3.401-2.759-5.947-5.946-5.947-.642 0-1.26.095-1.88.31A5.962 5.962 0 0010.205 0a5.947 5.947 0 00-5.827 4.757C1.713 5.447 0 7.945 0 10.49c0 1.666.713 3.283 1.998 4.448-.119.5-.19 1-.19 1.499 0 3.401 2.759 5.946 5.946 5.946.642 0 1.26-.095 1.88-.309a5.96 5.96 0 004.162 1.713z"/>`,
+  gemini: `<path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z"/>`,
+  grok: `<path d="M9.27 15.29l7.978-5.897c.391-.29.95-.177 1.137.272.98 2.369.542 5.215-1.41 7.169-1.951 1.954-4.667 2.382-7.149 1.406l-2.711 1.257c3.889 2.661 8.611 2.003 11.562-.953 2.341-2.344 3.066-5.539 2.388-8.42l.006.007c-.983-4.232.242-5.924 2.75-9.383.06-.082.12-.164.179-.248l-3.301 3.305v-.01L9.267 15.292M7.623 16.723c-2.792-2.67-2.31-6.801.071-9.184 1.761-1.763 4.647-2.483 7.166-1.425l2.705-1.25a7.808 7.808 0 00-1.829-1A8.975 8.975 0 005.984 5.83c-2.533 2.536-3.33 6.436-1.962 9.764 1.022 2.487-.653 4.246-2.34 6.022-.599.63-1.199 1.259-1.682 1.925l7.62-6.815"/>`,
+  cursor: `<path d="M22.106 5.68L12.5.135a.998.998 0 00-.998 0L1.893 5.68a.84.84 0 00-.419.726v11.186c0 .3.16.577.42.727l9.607 5.547a.999.999 0 00.998 0l9.608-5.547a.84.84 0 00.42-.727V6.407a.84.84 0 00-.42-.726zm-.603 1.176L12.228 22.92c-.063.108-.228.064-.228-.061V12.34a.59.59 0 00-.295-.51l-9.11-5.26c-.107-.062-.063-.228.062-.228h18.55c.264 0 .428.286.296.514z"/>`,
+  deepseek: `<path d="M23.748 4.482c-.254-.124-.364.113-.512.234-.051.039-.094.09-.137.136-.372.397-.806.657-1.373.626-.829-.046-1.537.214-2.163.848-.133-.782-.575-1.248-1.247-1.548-.352-.156-.708-.311-.955-.65-.172-.241-.219-.51-.305-.774-.055-.16-.11-.323-.293-.35-.2-.031-.278.136-.356.276-.313.572-.434 1.202-.422 1.84.027 1.436.633 2.58 1.838 3.393.137.093.172.187.129.323-.082.28-.18.552-.266.833-.055.179-.137.217-.329.14a5.526 5.526 0 01-1.736-1.18c-.857-.828-1.631-1.742-2.597-2.458a11.365 11.365 0 00-.689-.471c-.985-.957.13-1.743.388-1.836.27-.098.093-.432-.779-.428-.872.004-1.67.295-2.687.684a3.055 3.055 0 01-.465.137 9.597 9.597 0 00-2.883-.102c-1.885.21-3.39 1.102-4.497 2.623C.082 8.606-.231 10.684.152 12.85c.403 2.284 1.569 4.175 3.36 5.653 1.858 1.533 3.997 2.284 6.438 2.14 1.482-.085 3.133-.284 4.994-1.86.47.234.962.327 1.78.397.63.059 1.236-.03 1.705-.128.735-.156.684-.837.419-.961-2.155-1.004-1.682-.595-2.113-.926 1.096-1.296 2.746-2.642 3.392-7.003.05-.347.007-.565 0-.845-.004-.17.035-.237.23-.256a4.173 4.173 0 001.545-.475c1.396-.763 1.96-2.015 2.093-3.517.02-.23-.004-.467-.247-.588z"/>`,
+  kimi: `<path d="M21.846 0a1.923 1.923 0 110 3.846H20.15a.226.226 0 01-.227-.226V1.923C19.923.861 20.784 0 21.846 0z"/><path d="M11.065 11.199l7.257-7.2c.137-.136.06-.41-.116-.41H14.3a.164.164 0 00-.117.051l-7.82 7.756c-.122.12-.302.013-.302-.179V3.82c0-.127-.083-.23-.185-.23H3.186c-.103 0-.186.103-.186.23V19.77c0 .128.083.23.186.23h2.69c.103 0 .186-.102.186-.23v-3.25c0-.069.025-.135.069-.178l2.424-2.406a.158.158 0 01.205-.023l6.484 4.772a7.677 7.677 0 003.453 1.283c.108.012.2-.095.2-.23v-3.06c0-.117-.07-.212-.164-.227a5.028 5.028 0 01-2.027-.807l-5.613-4.064c-.117-.078-.132-.279-.028-.381z"/>`,
+  qwen: `<path d="M12.604 1.34c.393.69.784 1.382 1.174 2.075a.18.18 0 00.157.091h5.552c.174 0 .322.11.446.327l1.454 2.57c.19.337.24.478.024.837-.26.43-.513.864-.76 1.3l-.367.658c-.106.196-.223.28-.04.512l2.652 4.637c.172.301.111.494-.043.77-.437.785-.882 1.564-1.335 2.34-.159.272-.352.375-.68.37-.777-.016-1.552-.01-2.327.016a.099.099 0 00-.081.05 575.097 575.097 0 01-2.705 4.74c-.169.293-.38.363-.725.364-.997.003-2.002.004-3.017.002a.537.537 0 01-.465-.271l-1.335-2.323a.09.09 0 00-.083-.049H4.982c-.285.03-.553-.001-.805-.092l-1.603-2.77a.543.543 0 01-.002-.54l1.207-2.12a.198.198 0 000-.197 550.951 550.951 0 01-1.875-3.272l-.79-1.395c-.16-.31-.173-.496.095-.965.465-.813.927-1.625 1.387-2.436.132-.234.304-.334.584-.335a338.3 338.3 0 012.589-.001.124.124 0 00.107-.063l2.806-4.895a.488.488 0 01.422-.246c.524-.001 1.053 0 1.583-.006L11.704 1c.341-.003.724.032.9.34z"/>`,
+  zai: `<path d="M12.105 2L9.927 4.953H.653L2.83 2h9.276zM23.254 19.048L21.078 22h-9.242l2.174-2.952h9.244zM24 2L9.264 22H0L14.736 2H24z"/>`,
+  minimax: `<path d="M16.278 2c1.156 0 2.093.927 2.093 2.07v12.501a.74.74 0 00.744.709.74.74 0 00.743-.709V9.099a2.06 2.06 0 012.071-2.049A2.06 2.06 0 0124 9.1v6.561a.649.649 0 01-.652.645.649.649 0 01-.653-.645V9.1a.762.762 0 00-.766-.758.762.762 0 00-.766.758v7.472a2.037 2.037 0 01-2.048 2.026 2.037 2.037 0 01-2.048-2.026v-12.5a.785.785 0 00-.788-.753.785.785 0 00-.789.752l-.001 15.904A2.037 2.037 0 0113.441 22a2.037 2.037 0 01-2.048-2.026V18.04c0-.356.292-.645.652-.645.36 0 .652.289.652.645v1.934c0 .263.142.506.372.638.23.131.514.131.744 0a.734.734 0 00.372-.638V4.07c0-1.143.937-2.07 2.093-2.07zm-5.674 0c1.156 0 2.093.927 2.093 2.07v11.523a.648.648 0 01-.652.645.648.648 0 01-.652-.645V4.07a.785.785 0 00-.789-.78.785.785 0 00-.789.78v14.013a2.06 2.06 0 01-2.07 2.048 2.06 2.06 0 01-2.071-2.048V9.1a.762.762 0 00-.766-.758.762.762 0 00-.766.758v3.8a2.06 2.06 0 01-2.071 2.049A2.06 2.06 0 010 12.9v-1.378c0-.357.292-.646.652-.646.36 0 .653.29.653.646V12.9c0 .418.343.757.766.757s.766-.339.766-.757V9.099a2.06 2.06 0 012.07-2.048 2.06 2.06 0 012.071 2.048v8.984c0 .419.343.758.767.758.423 0 .766-.339.766-.758V4.07c0-1.143.937-2.07 2.093-2.07z"/>`,
+  mistral: `<path clip-rule="evenodd" d="M3.428 3.4h3.429v3.428h3.429v3.429h-.002 3.431V6.828h3.427V3.4h3.43v13.714H24v3.429H13.714v-3.428h-3.428v-3.429h-3.43v3.428h3.43v3.429H0v-3.429h3.428V3.4zm10.286 13.715h3.428v-3.429h-3.427v3.429z"/>`,
+};
+
+const MODEL_ICON_RULES = [
+  { needles: ["composer", "cursor"], icon: "cursor", color: "#22c55e" },
+  { needles: ["claude", "anthropic", "fable", "sonnet", "opus", "haiku"], icon: "claude", color: "#d97757" },
+  { needles: ["gpt", "codex", "openai", "o1-", "o3-", "o4-"], icon: "openai", color: "text" },
+  { needles: ["gemini", "gemma"], icon: "gemini", color: "#3b82f6" },
+  { needles: ["deepseek"], icon: "deepseek", color: "#4D6BFE" },
+  { needles: ["kimi", "moonshot", "k2p", "k2-", "k2.", "k3"], icon: "kimi", color: "#8B5CF6" },
+  { needles: ["glm", "chatglm", "z-ai", "zai"], icon: "zai", color: "#10b981" },
+  { needles: ["grok", "x-ai", "xai"], icon: "grok", color: "text" },
+  { needles: ["qwen"], icon: "qwen", color: "#6366f1" },
+  { needles: ["minimax"], icon: "minimax", color: "#F04438" },
+  { needles: ["mistral", "magistral", "devstral"], icon: "mistral", color: "#f97316" },
+];
+
+function matchModelIconRule(model) {
+  const id = String(model || "").toLowerCase();
+  for (const rule of MODEL_ICON_RULES) {
+    if (rule.needles.some(n => id.includes(n))) return rule;
+  }
+  return null;
+}
+
+const MIX_DEFS = [
+  { key: "input", labelZh: "Input", labelEn: "Input", color: "#0ea5e9" },
+  { key: "output", labelZh: "Output", labelEn: "Output", color: "#10b981" },
+  { key: "cacheRead", labelZh: "Cache Read", labelEn: "Cache Read", color: "#a855f7" },
+  { key: "cacheWrite", labelZh: "Cache Write", labelEn: "Cache Write", color: "#f97316" },
+  { key: "reasoning", labelZh: "Reasoning", labelEn: "Reasoning", color: "#f43f5e" },
+];
+
+// Cloud session device grouping (mirrors web/src/lib/devices/cloud.ts)
+const CLOUD_DEVICE_PROVIDERS = {
+  claude: { client: "claude", label: "Claude Code cloud" },
+  codex: { client: "codex", label: "Codex cloud" },
+};
+const CLOUD_DEVICE_KEY_RE = /^cloud_([a-z]+)_([0-9a-f]{32})$/;
+
+function parseCloudDeviceKey(deviceKey) {
+  const m = CLOUD_DEVICE_KEY_RE.exec(String(deviceKey || ""));
+  if (!m) return null;
+  const provider = m[1];
+  if (!Object.prototype.hasOwnProperty.call(CLOUD_DEVICE_PROVIDERS, provider)) return null;
+  return { provider, hash: m[2], ...CLOUD_DEVICE_PROVIDERS[provider] };
+}
+
+function groupCloudDevices(devices) {
+  const result = [];
+  const groups = new Map();
+
+  for (const device of devices) {
+    const cloud = parseCloudDeviceKey(device.deviceKey);
+    if (!cloud) {
+      result.push(device);
+      continue;
+    }
+    const existing = groups.get(cloud.provider);
+    if (!existing) {
+      const row = {
+        ...device,
+        id: `cloud:${cloud.provider}`,
+        displayName: cloud.label,
+        cloudSessions: 1,
+        activeDays:
+          device.cloudGroupActiveDays != null
+            ? device.cloudGroupActiveDays
+            : device.activeDays,
+        sessions: [device],
+      };
+      groups.set(cloud.provider, row);
+      result.push(row);
+      continue;
+    }
+    existing.cloudSessions = (existing.cloudSessions || 1) + 1;
+    existing.totalTokens += device.totalTokens;
+    existing.totalCost += device.totalCost;
+    existing.inputTokens += device.inputTokens;
+    existing.outputTokens += device.outputTokens;
+    existing.activeDays =
+      device.cloudGroupActiveDays != null
+        ? device.cloudGroupActiveDays
+        : Math.max(existing.activeDays, device.activeDays);
+    if (
+      device.lastSubmittedAt &&
+      (!existing.lastSubmittedAt || device.lastSubmittedAt > existing.lastSubmittedAt)
+    ) {
+      existing.lastSubmittedAt = device.lastSubmittedAt;
+    }
+    existing.sessions.push(device);
+  }
+  return result;
+}
+
+function clientName(id) {
+  const k = String(id || "").toLowerCase();
+  return CLIENT_NAMES[k] || String(id || "Unknown");
+}
+
+function clientColor(id) {
+  const k = String(id || "").toLowerCase();
+  return CLIENT_COLORS[k] || "#3b82f6";
+}
+
+function clientLogoURL(id) {
+  const k = String(id || "").toLowerCase();
+  const rel = CLIENT_LOGOS[k];
+  if (!rel || !baseURL) return "";
+  return `${baseURL}${rel}`;
+}
+
+function ClientIcon(id, size = 14) {
+  const url = clientLogoURL(id);
+  if (url) {
+    return h("Image", {
+      src: url,
+      width: size,
+      height: size,
+      tw: `w-[${size}px] h-[${size}px] rounded-[3.5px] object-contain shrink-0`,
+    });
+  }
+  return h("Box", {
+    tw: `w-2.5 h-2.5 rounded-full shrink-0 bg-[${clientColor(id)}]`,
+  });
+}
+
+function ModelIcon(modelId, size = 13) {
+  const rule = matchModelIconRule(modelId);
+  const paths = rule ? MODEL_BRAND_PATHS[rule.icon] : null;
+  if (paths) {
+    const rawSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">${paths}</svg>`;
+    const c = rule.color && rule.color !== "text" ? `[${rule.color}]` : "text";
+    return h("Icon", {
+      svg: rawSvg,
+      tw: `text-[${size}px] size-[${size}px] text-${c} shrink-0`,
+    });
+  }
+  const clean = String(modelId || "").replace(/^.*\//, "");
+  const initial = (clean[0] || "M").toUpperCase();
+  const palette = ["#ec4899", "#8b5cf6", "#0ea5e9", "#f59e0b", "#10b981"];
+  const color = palette[clean.charCodeAt(0) % palette.length] || "#ec4899";
+  return h(
+    "Row",
+    {
+      tw: `w-[${size}px] h-[${size}px] rounded-[4px] bg-[${color}] items-center justify-center shrink-0`,
+    },
+    TX(initial, { tw: "text-[9px] font-bold text-[#ffffff] leading-none" })
+  );
+}
+
+// ---------------------------------------------------------------------------
+// UI Copy (Unified English)
+// ---------------------------------------------------------------------------
+
+const I18N = {
+  usageDetailTitle: "Usage Detail",
+  periodAll: "All Time",
+  periodMonth: "30 Days",
+  periodWeek: "7 Days",
+  todayTitle: "Today",
+  todayEmpty: "No usage recorded for today yet",
+  latestActive: (d, tok, cost) => `Last active ${d} · ${tok} · ${cost}`,
+  messagesUnit: n => `${n} msgs`,
+  totalTokens: "Total Tokens",
+  periodTokens: "Period Tokens",
+  totalCost: "Est. Cost",
+  periodCost: "Period Cost",
+  activeDays: "Active Days",
+  submissions: "Submissions",
+  sessionsSub: n => (n > 0 ? `${n} sessions` : "All clients"),
+  dailyAvgSub: v => `Avg ${v}/active day`,
+  updatedSub: (age, ver) => (age ? `Updated ${age}${ver ? " · v" + ver : ""}` : "No submissions"),
+  ioSub: (i, o) => `In ${i} · Out ${o}`,
+  tokenMixTitle: "Token Breakdown",
+  trendTitle: "Daily Trend",
+  metricTokens: "Tokens",
+  metricCost: "Cost ($)",
+  heatmapTitle: "Activity",
+  heatmapActiveDays: n => `${n} active days`,
+  selectedDayTitle: d => `${d} Breakdown`,
+  clientsUsedTitle: "Active Clients",
+  modelsTitle: "Models",
+  sortByCost: "Cost",
+  sortByTokens: "Tokens",
+  noModels: "No model breakdown recorded for this period",
+  devicesTitle: "Devices",
+  devicesCount: n => `${n} ${n === 1 ? "device" : "devices"}`,
+  noDevices: "No devices found",
+  cloudSessionsCount: n => `${n} ${n === 1 ? "session" : "sessions"}`,
+  cloudSessionsListTitle: "Cloud Sessions",
+  lastSubmitted: age => (age ? `Last submitted ${age}` : "Never submitted"),
+  daysActive: n => `${n}d active`,
+  backToMain: "Back",
+  deviceDetailTitle: "Device Detail",
+  deviceRecentDays: "Daily Submissions",
+  privateModeBadge: "Private",
+  privateFallbackNotice: "This account is in Private Mode. Showing aggregate & device stats via CLI token. Add a Read Token (tkr_…) in Inputs for full model/client breakdowns.",
+  bannedNotice: r => `Account banned${r ? ": " + r : ""}`,
+  setupTitle: "Connect to Tokens",
+  setupDesc: "Run `tokens login` in your terminal for automatic detection, or enter any GitHub username in this dashboard's Inputs.",
+  invalidUrlTitle: "Invalid Server URL",
+  connErrTitle: "Couldn't load Tokens data",
+  retry: "Retry",
+  refresh: "Refresh",
+  openProfile: "Open Profile on tokens.ci",
+  openLeaderboard: "Open Leaderboard",
+  trayTooltip: (u, tTok, tCost, allTok, allCost, rank) =>
+    `@${u} · Today ${tTok} (${tCost}) · Total ${allTok} (${allCost})${rank ? " · #" + rank : ""}`,
+};
+
+function T() {
+  return I18N;
+}
+
+function isDarkTheme() {
+  try {
+    return !!(globalThis.matchMedia && globalThis.matchMedia("(prefers-color-scheme: dark)").matches);
+  } catch (e) {
+    return true;
+  }
+}
+
+function cardBorder() {
+  return isDarkTheme() ? "[#ffffff12]" : "[#00000010]";
+}
+
+function Line() {
+  return h("Box", { tw: `w-full h-px bg-${cardBorder()} shrink-0` });
+}
+
+// ---------------------------------------------------------------------------
+// Formatting Helpers
+// ---------------------------------------------------------------------------
+
+const num = (v, d = 0) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : d;
+};
+const str = v => (typeof v === "string" ? v.trim() : "");
+const clampPct = v => Math.max(0, Math.min(100, num(v, 0)));
+
+function comma(n) {
+  const v = Math.round(num(n, 0));
+  return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function formatTokens(n, decimals = 1) {
+  const v = Math.max(0, num(n, 0));
+  if (v >= 1e12) return `${(v / 1e12).toFixed(decimals).replace(/\.0+$/, "")}T`;
+  if (v >= 1e9) return `${(v / 1e9).toFixed(decimals).replace(/\.0+$/, "")}B`;
+  if (v >= 1e6) return `${(v / 1e6).toFixed(decimals).replace(/\.0+$/, "")}M`;
+  if (v >= 1e3) return `${(v / 1e3).toFixed(decimals).replace(/\.0+$/, "")}K`;
+  return String(Math.round(v));
+}
+
+function formatCost(c, compact = false) {
+  const v = Math.max(0, num(c, 0));
+  if (v === 0) return "$0.00";
+  if (compact && v >= 1e6) return `$${(v / 1e6).toFixed(2)}M`;
+  if (compact && v >= 1e3) return `$${(v / 1e3).toFixed(2)}K`;
+  if (v < 0.01) return "<$0.01";
+  const parts = v.toFixed(2).split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return `$${parts.join(".")}`;
+}
+
+function formatPercent(p) {
+  const v = Math.max(0, num(p, 0));
+  if (v === 0) return "0%";
+  if (v < 0.01) return "<0.01%";
+  if (v < 1) return `${v.toFixed(2)}%`;
+  return `${v.toFixed(1).replace(/\.0$/, "")}%`;
+}
+
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function formatPrettyDate(ymd) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || ""));
+  if (!m) return String(ymd || "");
+  const yr = Number(m[1]);
+  const mo = Number(m[2]) - 1;
+  const dy = Number(m[3]);
+  return `${MONTHS_SHORT[mo] || m[2]} ${dy}, ${yr}`;
+}
+
+function formatAge(iso) {
+  if (!iso) return "";
+  const t = typeof iso === "number" ? iso : Date.parse(String(iso));
+  if (!Number.isFinite(t)) return "";
+  const sec = Math.max(0, Math.floor((Date.now() - t) / 1000));
+  if (sec < 60) return "just now";
+  if (sec < 3600) return `${Math.floor(sec / 60)}m ago`;
+  if (sec < 86400) return `${Math.floor(sec / 3600)}h ago`;
+  return `${Math.floor(sec / 86400)}d ago`;
+}
+
+function localDateKey(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function rankBadgeColor(rank) {
+  if (rank === 1) return "[#E3B341]";
+  if (rank === 2) return "[#A8B3C5]";
+  if (rank === 3) return "[#DA7E1A]";
+  return "accent";
+}
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+
+let baseURL = "https://tokens.ci";
+let inputUsername = "";
+let credentialsPath = "~/.config/tokens/credentials.json";
+let secretToken = "";
+let trayFormat = "today_cost";
+let inputErr = "";
+
+// Resolved identity & tokens
+let resolvedUsername = "";
+let resolvedApiToken = ""; // tt_...
+let resolvedReadToken = ""; // tkr_...
+
+// UI navigation & preferences
+let activePeriod = localStorage.getItem("tokens.period") || "all";
+if (!["all", "month", "week"].includes(activePeriod)) activePeriod = "all";
+let trendMetric = localStorage.getItem("tokens.trendMetric") === "cost" ? "cost" : "tokens";
+let modelSort = localStorage.getItem("tokens.modelSort") === "cost" ? "cost" : "tokens";
+let showAllModels = false;
+let selectedDate = null; // YYYY-MM-DD in heatmap
+let selectedDeviceId = null;
+const collapsedClients = new Set();
+
+// Cached API payloads
+const profileCache = new Map(); // period -> normalized profile object
+let devicesList = [];
+let meStatsData = null;
+let todayRank = null;
+const deviceDetailCache = new Map(); // deviceId -> { loading, error, data, loadedAt }
+
+let loading = false;
+let loadedAt = 0;
+let error = "";
+let inflight = null;
+
+function parseBaseURL(raw) {
+  const s = str(raw || "https://tokens.ci").replace(/\/+$/, "");
+  if (!s) return { url: "https://tokens.ci", err: "" };
+  try {
+    const u = new URL(s);
+    if (u.protocol !== "https:" && u.protocol !== "http:") {
+      return { url: "", err: "Tokens Server URL must use https:// or authorized local http://." };
+    }
+    return { url: u.origin + u.pathname.replace(/\/+$/, ""), err: "" };
+  } catch (e) {
+    return { url: "", err: "Invalid Tokens Server URL. Example: https://tokens.ci" };
+  }
+}
+
+function readSecret(name) {
+  try {
+    return str($metrix.secret(name));
+  } catch (e) {
+    return "";
+  }
+}
+
+function redact(msg) {
+  let text = String(msg || "");
+  for (const s of [secretToken, resolvedApiToken, resolvedReadToken]) {
+    if (s && s.length >= 4) text = text.split(s).join("•••");
+  }
+  return text.slice(0, 220);
+}
+
+function syncInputs(env) {
+  const inputs = (env && env.inputs) || {};
+  const parsed = parseBaseURL(inputs.baseURL);
+  const nextUser = str(inputs.username).replace(/^@/, "");
+  const nextCreds = str(inputs.credentials) || "~/.config/tokens/credentials.json";
+  const nextSecret = readSecret("token");
+  const nextTray = str(inputs.trayFormat) || "today_cost";
+  if (["today_cost", "today_rank", "total_rank", "total_cost", "today_only", "cost_only"].includes(nextTray)) {
+    trayFormat = nextTray;
+  }
+
+  const sig = `${parsed.url}\n${parsed.err}\n${nextUser}\n${nextCreds}\n${nextSecret}`;
+  if (sig === syncInputs.sig) return;
+  syncInputs.sig = sig;
+  baseURL = parsed.url;
+  inputErr = parsed.err;
+  inputUsername = nextUser;
+  credentialsPath = nextCreds;
+  secretToken = nextSecret;
+
+  resolvedUsername = inputUsername;
+  resolvedApiToken = "";
+  resolvedReadToken = "";
+  profileCache.clear();
+  devicesList = [];
+  meStatsData = null;
+  todayRank = null;
+  deviceDetailCache.clear();
+  selectedDeviceId = null;
+  selectedDate = null;
+  error = "";
+  loadedAt = 0;
+}
+
+// ---------------------------------------------------------------------------
+// Authentication & API Fetching
+// ---------------------------------------------------------------------------
+
+async function resolveCredentials() {
+  let fileUser = "";
+  let fileToken = "";
+  if (credentialsPath) {
+    try {
+      const raw = await $metrix.readFile(credentialsPath);
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        fileUser = str(parsed.username);
+        fileToken = str(parsed.token);
+      }
+    } catch (e) {}
+  }
+
+  let readTok = "";
+  let apiTok = "";
+  if (secretToken.startsWith("tkr_")) {
+    readTok = secretToken;
+  } else if (secretToken.startsWith("tt_")) {
+    apiTok = secretToken;
+  } else if (secretToken) {
+    readTok = secretToken;
+  }
+
+  const targetUser = inputUsername || fileUser;
+  if (!apiTok && fileToken.startsWith("tt_")) {
+    if (!inputUsername || inputUsername.toLowerCase() === fileUser.toLowerCase()) {
+      apiTok = fileToken;
+    }
+  }
+
+  resolvedReadToken = readTok;
+  resolvedApiToken = apiTok;
+
+  if (!targetUser && apiTok && baseURL) {
+    try {
+      const res = await fetch(`${baseURL}/api/auth/token`, {
+        headers: { Authorization: `Bearer ${apiTok}`, Accept: "application/json" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.user && str(data.user.username)) {
+          resolvedUsername = str(data.user.username);
+          return;
+        }
+      }
+    } catch (e) {}
+  }
+  resolvedUsername = targetUser;
+}
+
+async function fetchJSON(path, token) {
+  const headers = { Accept: "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(baseURL + path, { headers });
+  const text = await res.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch (e) {
+    data = null;
+  }
+  if (!res.ok) {
+    const msg = (data && data.error) || `HTTP ${res.status}`;
+    const err = new Error(redact(msg));
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+function buildProfileFromMeStats(me, username) {
+  const days = Array.isArray(me && me.days) ? me.days : [];
+  const maxCost = Math.max(0, ...days.map(d => num(d.cost, 0)));
+  let totalInput = 0;
+  let totalOutput = 0;
+  let activeDays = 0;
+  const contributions = days.map(d => {
+    const tok = num(d.tokens, 0);
+    const cost = num(d.cost, 0);
+    const inp = num(d.inputTokens, 0);
+    const out = num(d.outputTokens, 0);
+    totalInput += inp;
+    totalOutput += out;
+    if (tok > 0) activeDays++;
+    const intensity =
+      maxCost <= 0 || cost <= 0 ? 0 : cost <= maxCost * 0.25 ? 1 : cost <= maxCost * 0.5 ? 2 : cost <= maxCost * 0.75 ? 3 : 4;
+    return {
+      date: str(d.date),
+      totals: { tokens: tok, cost, messages: 0 },
+      intensity,
+      tokenBreakdown: { input: inp, output: out, cacheRead: 0, cacheWrite: 0, reasoning: 0 },
+      clients: [],
+    };
+  });
+
+  return {
+    privateFallback: true,
+    banned: false,
+    user: {
+      username: username || "me",
+      displayName: username || "Private Account",
+      avatarUrl: null,
+      isPrivate: true,
+      rank: null,
+      verified: false,
+    },
+    stats: {
+      totalTokens: num(me && me.totalTokens, 0),
+      totalCost: num(me && me.totalCost, 0),
+      inputTokens: totalInput,
+      outputTokens: totalOutput,
+      cacheReadTokens: 0,
+      cacheWriteTokens: 0,
+      reasoningTokens: 0,
+      submissionCount: days.length,
+      activeDays,
+      sessionCount: 0,
+    },
+    updatedAt: (me && me.lastSubmittedAt) || null,
+    submissionFreshness: null,
+    clients: [],
+    models: [],
+    modelUsage: [],
+    contributions,
+    period: "all",
+  };
+}
+
+function normalizeProfile(raw, period) {
+  if (!raw || typeof raw !== "object") throw new Error("Invalid profile response.");
+  if (raw.banned) {
+    return {
+      banned: true,
+      banReason: str(raw.banReason),
+      user: {
+        username: str(raw.user && raw.user.username),
+        displayName: str(raw.user && raw.user.displayName) || null,
+        avatarUrl: str(raw.user && raw.user.avatarUrl) || null,
+        isPrivate: false,
+        rank: null,
+        verified: false,
+      },
+      stats: {
+        totalTokens: 0,
+        totalCost: 0,
+        inputTokens: 0,
+        outputTokens: 0,
+        cacheReadTokens: 0,
+        cacheWriteTokens: 0,
+        reasoningTokens: 0,
+        submissionCount: 0,
+        activeDays: 0,
+        sessionCount: 0,
+      },
+      updatedAt: null,
+      submissionFreshness: null,
+      clients: [],
+      models: [],
+      modelUsage: [],
+      contributions: [],
+      period,
+    };
+  }
+  const u = raw.user || {};
+  const st = raw.stats || {};
+  return {
+    privateFallback: false,
+    banned: false,
+    user: {
+      username: str(u.username),
+      displayName: str(u.displayName) || null,
+      avatarUrl: str(u.avatarUrl) || null,
+      isPrivate: u.isPrivate === true,
+      rank: num(u.rank, 0) > 0 ? num(u.rank, 0) : null,
+      verified: u.verified === true,
+    },
+    stats: {
+      totalTokens: num(st.totalTokens, 0),
+      totalCost: num(st.totalCost, 0),
+      inputTokens: num(st.inputTokens, 0),
+      outputTokens: num(st.outputTokens, 0),
+      cacheReadTokens: num(st.cacheReadTokens, 0),
+      cacheWriteTokens: num(st.cacheWriteTokens, 0),
+      reasoningTokens: num(st.reasoningTokens, 0),
+      submissionCount: num(st.submissionCount, 0),
+      activeDays: num(st.activeDays, 0),
+      sessionCount: num(st.sessionCount, 0),
+    },
+    updatedAt: str(raw.updatedAt) || null,
+    submissionFreshness: raw.submissionFreshness || null,
+    clients: Array.isArray(raw.clients) ? raw.clients : [],
+    models: Array.isArray(raw.models) ? raw.models : [],
+    modelUsage: Array.isArray(raw.modelUsage) ? raw.modelUsage : [],
+    contributions: Array.isArray(raw.contributions) ? raw.contributions : [],
+    period: str(raw.period) || period,
+  };
+}
+
+async function loadPeriodData(period) {
+  await resolveCredentials();
+  if (!baseURL || !resolvedUsername) return;
+
+  const query = period === "all" ? "" : `?period=${encodeURIComponent(period)}`;
+  const userPath = `/api/users/${encodeURIComponent(resolvedUsername)}${query}`;
+  const devicesPath = `/api/users/${encodeURIComponent(resolvedUsername)}/devices`;
+  const todayKey = localDateKey();
+  const todayRankPath = `/api/leaderboard?period=today&from=${encodeURIComponent(todayKey)}&search=${encodeURIComponent(resolvedUsername)}&limit=5`;
+
+  const tasks = [
+    fetchJSON(userPath, resolvedReadToken),
+    fetchJSON(devicesPath, resolvedReadToken).catch(() => null),
+    resolvedApiToken ? fetchJSON("/api/me/stats", resolvedApiToken).catch(() => null) : Promise.resolve(null),
+    fetchJSON(todayRankPath).catch(() => null),
+  ];
+  if (period !== "all" && !profileCache.has("all")) {
+    tasks.push(fetchJSON(`/api/users/${encodeURIComponent(resolvedUsername)}`, resolvedReadToken).catch(() => null));
+  }
+
+  const [profSettled, devSettled, meSettled, todayRankSettled, allSettled] = await Promise.allSettled(tasks);
+
+  const meVal = meSettled && meSettled.status === "fulfilled" ? meSettled.value : null;
+  if (meVal) meStatsData = meVal;
+
+  const trVal = todayRankSettled && todayRankSettled.status === "fulfilled" ? todayRankSettled.value : null;
+  if (trVal && Array.isArray(trVal.users)) {
+    const matched = trVal.users.find(
+      u => u && String(u.username || "").toLowerCase() === resolvedUsername.toLowerCase()
+    );
+    todayRank = matched && num(matched.rank, 0) > 0 ? num(matched.rank, 0) : null;
+  }
+
+  if (allSettled && allSettled.status === "fulfilled" && allSettled.value) {
+    profileCache.set("all", normalizeProfile(allSettled.value, "all"));
+  }
+
+  if (profSettled.status === "fulfilled" && profSettled.value) {
+    const norm = normalizeProfile(profSettled.value, period);
+    profileCache.set(period, norm);
+  } else {
+    const reason = profSettled.reason;
+    if (reason && reason.status === 404 && meStatsData) {
+      const fallback = buildProfileFromMeStats(meStatsData, resolvedUsername);
+      profileCache.set(period, fallback);
+      profileCache.set("all", fallback);
+    } else {
+      throw reason || new Error("Failed to load profile");
+    }
+  }
+
+  const nameById = new Map();
+  if (meStatsData && Array.isArray(meStatsData.devices)) {
+    for (const d of meStatsData.devices) {
+      if (d && d.id && str(d.displayName)) nameById.set(String(d.id), str(d.displayName));
+    }
+  }
+
+  const devVal = devSettled && devSettled.status === "fulfilled" ? devSettled.value : null;
+  if (devVal && Array.isArray(devVal.devices)) {
+    const rawDevices = devVal.devices.map(d => ({
+      id: str(d.id),
+      deviceKey: str(d.deviceKey),
+      displayName: nameById.get(str(d.id)) || str(d.displayName) || "Device",
+      lastSubmittedAt: str(d.lastSubmittedAt) || null,
+      totalTokens: num(d.totalTokens, 0),
+      totalCost: num(d.totalCost, 0),
+      inputTokens: num(d.inputTokens, 0),
+      outputTokens: num(d.outputTokens, 0),
+      activeDays: num(d.activeDays, 0),
+      cloudGroupActiveDays:
+        d.cloudGroupActiveDays != null ? num(d.cloudGroupActiveDays, 0) : null,
+      firstDay: str(d.firstDay) || null,
+      lastDay: str(d.lastDay) || null,
+    }));
+    devicesList = groupCloudDevices(rawDevices);
+  } else if (meStatsData && Array.isArray(meStatsData.devices)) {
+    devicesList = meStatsData.devices.map(d => ({
+      id: str(d.id),
+      deviceKey: "",
+      displayName: str(d.displayName) || "Device",
+      lastSubmittedAt: str(d.lastSubmittedAt) || null,
+      totalTokens: 0,
+      totalCost: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+      activeDays: 0,
+      firstDay: null,
+      lastDay: null,
+    }));
+  }
+}
+
+async function loadDeviceDetail(deviceId) {
+  if (!baseURL || !resolvedUsername || !deviceId || String(deviceId).startsWith("cloud:")) return;
+  const prev = deviceDetailCache.get(deviceId) || { data: null, loadedAt: 0 };
+  deviceDetailCache.set(deviceId, { ...prev, loading: true, error: "" });
+  $metrix.invalidate();
+
+  try {
+    const data = await fetchJSON(
+      `/api/users/${encodeURIComponent(resolvedUsername)}/devices/${encodeURIComponent(deviceId)}`,
+      resolvedReadToken
+    );
+    if (meStatsData && Array.isArray(meStatsData.devices) && data && data.device) {
+      const found = meStatsData.devices.find(d => d && String(d.id) === String(deviceId));
+      if (found && str(found.displayName)) data.device.displayName = str(found.displayName);
+    }
+    deviceDetailCache.set(deviceId, { data, loading: false, error: "", loadedAt: Date.now() });
+  } catch (e) {
+    deviceDetailCache.set(deviceId, {
+      ...prev,
+      loading: false,
+      error: redact((e && e.message) || e),
+    });
+  }
+  $metrix.invalidate();
+}
+
+function refresh() {
+  if (inputErr || !baseURL) return Promise.resolve();
+  if (inflight) return inflight;
+  loading = true;
+  $metrix.invalidate();
+  inflight = loadPeriodData(activePeriod)
+    .then(() => {
+      error = "";
+      loadedAt = Date.now();
+      if (selectedDeviceId) {
+        return loadDeviceDetail(selectedDeviceId);
+      }
+    })
+    .catch(e => {
+      error = redact((e && e.message) || e);
+    })
+    .finally(() => {
+      inflight = null;
+      loading = false;
+      $metrix.invalidate();
+    });
+  return inflight;
+}
+
+const launchRefresh = () => {
+  void refresh();
+};
+
+function switchPeriod(nextPeriod) {
+  if (!["all", "month", "week"].includes(nextPeriod) || nextPeriod === activePeriod) return;
+  activePeriod = nextPeriod;
+  selectedDate = null;
+  localStorage.setItem("tokens.period", activePeriod);
+  $metrix.invalidate();
+  if (!profileCache.has(activePeriod)) {
+    launchRefresh();
+  }
+}
+
+function selectDevice(deviceId) {
+  selectedDeviceId = deviceId;
+  if (String(deviceId).startsWith("cloud:")) {
+    $metrix.invalidate();
+    return;
+  }
+  const cached = deviceDetailCache.get(deviceId);
+  $metrix.invalidate();
+  if (!cached || Date.now() - cached.loadedAt > 60e3) {
+    void loadDeviceDetail(deviceId);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Derived Helpers (Today, All-Time & Contribution Day Details)
+// ---------------------------------------------------------------------------
+
+function currentProfile() {
+  return profileCache.get(activePeriod) || profileCache.get("all") || null;
+}
+
+function allTimeProfile() {
+  return profileCache.get("all") || currentProfile();
+}
+
+function findTodayAndLatest(prof) {
+  const baseProf = allTimeProfile() || prof;
+  const list = (baseProf && baseProf.contributions) || [];
+  const todayKey = localDateKey();
+  const utcTodayKey = new Date().toISOString().slice(0, 10);
+  let todayDay = list.find(d => d.date === todayKey) || list.find(d => d.date === utcTodayKey) || null;
+  let latestDay = null;
+  for (let i = list.length - 1; i >= 0; i--) {
+    if (num(list[i].totals && list[i].totals.tokens, 0) > 0) {
+      latestDay = list[i];
+      break;
+    }
+  }
+  return { todayKey, todayDay, latestDay };
+}
+
+function extractDayClients(day) {
+  if (!day || !Array.isArray(day.clients)) return [];
+  const out = [];
+  for (const c of day.clients) {
+    const tokObj = c.tokens || {};
+    const totalTokens =
+      num(tokObj.input, 0) +
+      num(tokObj.output, 0) +
+      num(tokObj.cacheRead, 0) +
+      num(tokObj.cacheWrite, 0) +
+      num(tokObj.reasoning, 0);
+    const models = [];
+    if (c.models && typeof c.models === "object") {
+      for (const [mId, mData] of Object.entries(c.models)) {
+        if (!mId || mId === "<synthetic>") continue;
+        const mInput = num(mData && mData.input, 0);
+        const mOutput = num(mData && mData.output, 0);
+        const mCacheRead = num(mData && mData.cacheRead, 0);
+        const mCacheWrite = num(mData && mData.cacheWrite, 0);
+        const mReasoning = num(mData && mData.reasoning, 0);
+        const mTok = Math.max(
+          num(mData && mData.tokens, 0),
+          mInput + mOutput + mCacheRead + mCacheWrite + mReasoning
+        );
+        models.push({
+          modelId: mId,
+          tokens: mTok,
+          cost: num(mData && mData.cost, 0),
+          input: mInput,
+          output: mOutput,
+          cacheRead: mCacheRead,
+          cacheWrite: mCacheWrite,
+          reasoning: mReasoning,
+          messages: num(mData && mData.messages, 0),
+          speedUsage: Array.isArray(mData && mData.speedUsage) ? mData.speedUsage : [],
+        });
+      }
+    }
+    models.sort((a, b) => b.cost - a.cost || b.tokens - a.tokens);
+    out.push({
+      client: str(c.client),
+      totalTokens,
+      cost: num(c.cost, 0),
+      messages: num(c.messages, 0),
+      models,
+    });
+  }
+  out.sort((a, b) => b.cost - a.cost || b.totalTokens - a.totalTokens);
+  return out;
+}
+
+function buildModelBreakdownLine(m) {
+  const parts = [`${formatTokens(m.tokens, 1)} tokens`];
+  if (m.input > 0) parts.push(`Input ${formatTokens(m.input, 1)}`);
+  if (m.output > 0) parts.push(`Output ${formatTokens(m.output, 1)}`);
+  if (m.cacheRead > 0) parts.push(`Cache read ${formatTokens(m.cacheRead, 1)}`);
+  if (m.cacheWrite > 0) parts.push(`Cache write ${formatTokens(m.cacheWrite, 1)}`);
+  if (m.reasoning > 0) parts.push(`Reasoning ${formatTokens(m.reasoning, 1)}`);
+  if (m.messages > 0) parts.push(`${comma(m.messages)} messages`);
+  return parts.join(" · ");
+}
+
+function renderSpeedTierPills(speedUsage, totalTokens, keyPrefix) {
+  if (!Array.isArray(speedUsage) || !speedUsage.length || totalTokens <= 0) return null;
+  const valid = speedUsage
+    .filter(s => s && num(s.tokens, 0) > 0 && (s.speed === "fast" || s.speed === "standard"))
+    .slice()
+    .sort((a, b) => num(b.tokens, 0) - num(a.tokens, 0));
+  if (!valid.length) return null;
+  return h(
+    "Row",
+    { tw: "flex-wrap gap-1.5 items-center pl-5 pt-0.5 w-full" },
+    valid.map((s, idx) => {
+      const isFast = s.speed === "fast";
+      const pct = Math.max(1, Math.min(100, Math.round((num(s.tokens, 0) / totalTokens) * 100)));
+      return h(
+        "Row",
+        {
+          key: `${keyPrefix}-sp-${s.speed}-${idx}`,
+          tw: `items-center gap-1 py-0.5 px-2 rounded-full shrink-0 ${
+            isFast ? "bg-[#f59e0b1f]" : "bg-surfaceHover"
+          }`,
+        },
+        Icon(isFast ? "zap" : "clock", 10, isFast ? "[#f59e0b]" : K.muted),
+        TX(`${isFast ? "Fast" : "Standard"} ${pct}%`, {
+          tw: `text-[10px] font-semibold tabular-nums ${isFast ? "text-[#f59e0b]" : "text-textMuted"}`,
+        })
+      );
+    })
+  );
+}
+
+function renderDayTokenCategories(day, keyPrefix) {
+  const tb = (day && day.tokenBreakdown) || {};
+  const rows = [
+    { ...MIX_DEFS[0], value: Math.max(0, num(tb.input, 0)) },
+    { ...MIX_DEFS[1], value: Math.max(0, num(tb.output, 0)) },
+    { ...MIX_DEFS[2], value: Math.max(0, num(tb.cacheRead, 0)) },
+    { ...MIX_DEFS[3], value: Math.max(0, num(tb.cacheWrite, 0)) },
+    { ...MIX_DEFS[4], value: Math.max(0, num(tb.reasoning, 0)) },
+  ];
+  const sum = rows.reduce((acc, r) => acc + r.value, 0);
+  if (sum <= 0) return null;
+  const nonZero = rows.filter(r => r.value > 0);
+
+  return h(
+    "Column",
+    { tw: "gap-2 pt-1 w-full min-w-0" },
+    Line(),
+    TX("TOKEN BREAKDOWN", {
+      tw: "text-[10px] font-bold text-textMuted tracking-[0.6px] pt-0.5",
+    }),
+    // Proportional bar
+    h(
+      "Row",
+      { tw: "gap-[2px] h-2 rounded-full overflow-hidden w-full bg-border" },
+      nonZero.map(r =>
+        h("Box", {
+          key: `${keyPrefix}-bar-${r.key}`,
+          tw: `h-2 rounded-full bg-[${r.color}]`,
+          grow: Math.max((r.value / sum) * 100, 1.5),
+          basis: 0,
+          tooltip: `${r.labelEn}: ${formatTokens(r.value, 1)} (${formatPercent((r.value / sum) * 100)})`,
+        })
+      )
+    ),
+    // 5-row vertical breakdown
+    h(
+      "Column",
+      { tw: "gap-1.5 w-full min-w-0" },
+      rows.map(r => {
+        const share = sum > 0 ? (r.value / sum) * 100 : 0;
+        return h(
+          "Row",
+          { key: `${keyPrefix}-cat-${r.key}`, tw: "items-center gap-2 w-full min-w-0" },
+          h("Box", { tw: `w-2 h-2 rounded-full shrink-0 bg-[${r.color}]` }),
+          TX(r.labelEn, { tw: "text-xs text-text truncate min-w-0 shrink grow" }),
+          TX(formatTokens(r.value, 1), {
+            tw: "text-xs font-bold tabular-nums shrink-0",
+          }),
+          TX(formatPercent(share), {
+            tw: "text-[11px] text-textMuted tabular-nums w-12 text-end shrink-0",
+          })
+        );
+      })
+    )
+  );
+}
+
+function renderDayClientsAndModels(clients, keyPrefix) {
+  if (!Array.isArray(clients) || !clients.length) return null;
+  return h(
+    "Column",
+    { tw: "gap-2.5 pt-1 w-full min-w-0" },
+    Line(),
+    TX("CLIENTS & MODELS", {
+      tw: "text-[10px] font-bold text-textMuted tracking-[0.6px] pt-0.5",
+    }),
+    ...clients.map(c => {
+      const collapseKey = `${keyPrefix}:${c.client}`;
+      const isCollapsed = collapsedClients.has(collapseKey);
+      return h(
+        "Column",
+        { key: `${keyPrefix}-c-${c.client}`, tw: "gap-2 w-full min-w-0" },
+        // Client Header Row
+        h(
+          "Row",
+          {
+            tw: "items-center gap-2 py-0.5 cursor-pointer w-full min-w-0",
+            onClick: () => {
+              if (collapsedClients.has(collapseKey)) collapsedClients.delete(collapseKey);
+              else collapsedClients.add(collapseKey);
+              $metrix.invalidate();
+            },
+          },
+          ClientIcon(c.client, 18),
+          TX(clientName(c.client), { tw: "text-[13px] font-bold truncate min-w-0 shrink grow" }),
+          TX(`${formatTokens(c.totalTokens, 1)} · ${formatCost(c.cost, false)}`, {
+            tw: "text-xs text-textMuted tabular-nums shrink-0",
+          }),
+          Icon(isCollapsed ? "chevRight" : "chevDown", 13, K.muted)
+        ),
+        // Nested Models
+        !isCollapsed && c.models.length > 0
+          ? h(
+              "Column",
+              { tw: "gap-2.5 pl-4 w-full min-w-0" },
+              ...c.models.map(m =>
+                h(
+                  "Column",
+                  { key: `${keyPrefix}-m-${c.client}-${m.modelId}`, tw: "gap-1 w-full min-w-0" },
+                  // Row 1: Model Icon + Model Name + Cost
+                  h(
+                    "Row",
+                    { tw: "items-center gap-1.5 w-full min-w-0" },
+                    ModelIcon(m.modelId, 13),
+                    TX(m.modelId, {
+                      tw: "text-xs font-mono font-bold truncate min-w-0 shrink grow",
+                      tooltip: m.modelId,
+                    }),
+                    TX(formatCost(m.cost, false), {
+                      tw: "text-xs font-bold tabular-nums shrink-0",
+                    })
+                  ),
+                  // Row 2: Detailed token & message breakdown string
+                  h(
+                    "Row",
+                    { tw: "pl-5 w-full min-w-0" },
+                    TX(buildModelBreakdownLine(m), {
+                      tw: "text-[11px] text-textMuted leading-[1.35] whitespace-normal tabular-nums min-w-0 shrink grow",
+                    })
+                  ),
+                  // Row 3: Speed tier pills (Fast / Standard)
+                  renderSpeedTierPills(m.speedUsage, m.tokens, `${keyPrefix}-${c.client}-${m.modelId}`)
+                )
+              )
+            )
+          : null
+      );
+    })
+  );
+}
+
+function dayMessageCount(day, clients) {
+  const sum = clients.reduce((acc, c) => acc + num(c.messages, 0), 0);
+  return sum > 0 ? sum : num(day && day.totals && day.totals.messages, 0);
+}
+
+// ---------------------------------------------------------------------------
+// Reusable UI Building Blocks
+// ---------------------------------------------------------------------------
+
+const bone = (w, hgt, extra) =>
+  h("Box", {
+    ...extra,
+    tw: `w-[${w}px] h-[${hgt}px] rounded bg-surfaceHover shrink-0 ${(extra && extra.tw) || ""}`,
+  });
+
+function IconButton(name, label, onClick, busy, key) {
+  return h(
+    "Column",
+    {
+      key,
+      tw: "w-7 h-7 items-center justify-center rounded-[7px] shrink-0 cursor-pointer hover:bg-surfaceHover pressed:bg-surfacePressed",
+      label,
+      tooltip: label,
+      onClick,
+    },
+    Icon(
+      name,
+      15,
+      K.muted,
+      busy
+        ? {
+            keyframes: {
+              duration: 900,
+              repeat: -1,
+              ease: "linear",
+              frames: [
+                { at: 0, rotate: 0 },
+                { at: 1, rotate: 360 },
+              ],
+            },
+          }
+        : null
+    )
+  );
+}
+
+function CompactToggle(items, value, onChange, keyPrefix) {
+  return h(
+    "Row",
+    { tw: "p-[2px] rounded-[6px] bg-surfaceHover items-center gap-[2px] shrink-0" },
+    items.map(it => {
+      const active = it.value === value;
+      return h(
+        "Row",
+        {
+          key: `${keyPrefix}-${it.value}`,
+          tw: `py-[2px] px-2 rounded-[4px] cursor-pointer items-center ${
+            active ? "bg-background shadow-sm" : ""
+          }`,
+          onClick: () => {
+            if (!active) onChange(it.value);
+          },
+        },
+        TX(it.label, {
+          tw: `text-[10.5px] leading-tight ${
+            active ? "font-semibold text-text" : "font-medium text-textMuted"
+          }`,
+        })
+      );
+    })
+  );
+}
+
+function profileURL() {
+  const b = baseURL || "https://tokens.ci";
+  return resolvedUsername ? `${b}/u/${encodeURIComponent(resolvedUsername)}` : b;
+}
+
+function Header() {
+  const t = T();
+  const prof = currentProfile();
+  const allProf = allTimeProfile();
+  const rank = (allProf && allProf.user && allProf.user.rank) || (prof && prof.user && prof.user.rank) || null;
+  const verified = !!(prof && prof.user && prof.user.verified);
+  const isPrivate = !!(prof && prof.user && prof.user.isPrivate);
+  const avatarUrl =
+    prof && prof.user && prof.user.avatarUrl && prof.user.avatarUrl.startsWith("https://avatars.githubusercontent.com/")
+      ? prof.user.avatarUrl
+      : "";
+
+  if (selectedDeviceId) {
+    const dev = devicesList.find(d => d.id === selectedDeviceId);
+    const title = (dev && dev.displayName) || t.deviceDetailTitle;
+    const isCloudGroup = String(selectedDeviceId).startsWith("cloud:");
+    return h(
+      "Column",
+      { tw: "w-full shrink-0" },
+      h(
+        "Row",
+        { tw: "gap-2 pt-3 pr-3 pb-2.5 pl-3.5 items-center w-full min-w-0" },
+        IconButton(
+          "back",
+          t.backToMain,
+          () => {
+            selectedDeviceId = null;
+            $metrix.invalidate();
+          },
+          false,
+          "btn-back"
+        ),
+        Icon("laptop", 15, "accent"),
+        TX(title, { tw: "text-sm font-bold truncate min-w-0 shrink" }),
+        dev && dev.activeDays > 0
+          ? h("Badge", {
+              text: t.daysActive(dev.activeDays),
+              textColor: K.muted,
+              background: K.hover,
+            })
+          : null,
+        h("Spacer"),
+        IconButton(
+          "refresh",
+          t.refresh,
+          () => (isCloudGroup ? launchRefresh() : loadDeviceDetail(selectedDeviceId)),
+          loading,
+          "btn-refresh-dev"
+        ),
+        IconButton("external", t.openProfile, () => $metrix.openURL(profileURL()), false, "btn-open")
+      ),
+      Line()
+    );
+  }
+
+  return h(
+    "Column",
+    { tw: "w-full shrink-0" },
+    h(
+      "Row",
+      { tw: "gap-2 pt-3 pr-3 pb-2.5 pl-4 items-center w-full min-w-0" },
+      Icon("brand", 18, "accent"),
+      resolvedUsername
+        ? h("Avatar", {
+            name: resolvedUsername,
+            ...(avatarUrl ? { src: avatarUrl } : {}),
+            size: 20,
+          })
+        : null,
+      TX(resolvedUsername ? `@${resolvedUsername}` : "Tokens", {
+        tw: "text-sm font-bold truncate min-w-0 shrink",
+      }),
+      verified
+        ? h(
+            "Row",
+            {
+              tw: "w-4 h-4 rounded-full bg-[#2F8FFF22] items-center justify-center shrink-0",
+              tooltip: "Verified profile",
+            },
+            Icon("check", 10, "[#2F8FFF]")
+          )
+        : null,
+      rank
+        ? h("Badge", {
+            text: `#${comma(rank)}`,
+            textColor: rankBadgeColor(rank),
+            background: K.hover,
+          })
+        : null,
+      isPrivate
+        ? h("Badge", {
+            text: t.privateModeBadge,
+            textColor: K.warn,
+            background: K.hover,
+          })
+        : null,
+      h("Spacer"),
+      resolvedUsername ? IconButton("refresh", t.refresh, launchRefresh, loading, "btn-refresh") : null,
+      IconButton("external", t.openProfile, () => $metrix.openURL(profileURL()), false, "btn-open")
+    ),
+    Line()
+  );
+}
+
+function PeriodHeaderBar() {
+  const t = T();
+  return h(
+    "Row",
+    { tw: "gap-2 pt-1 items-center w-full min-w-0" },
+    TX(t.usageDetailTitle, { tw: "text-xs font-bold text-textMuted shrink-0" }),
+    h("Spacer"),
+    CompactToggle(
+      [
+        { label: t.periodAll, value: "all" },
+        { label: t.periodMonth, value: "month" },
+        { label: t.periodWeek, value: "week" },
+      ],
+      activePeriod,
+      v => switchPeriod(String(v || "all")),
+      "seg-period"
+    )
+  );
+}
+
+function Banner() {
+  const t = T();
+  const prof = currentProfile();
+  if (!error && !(prof && prof.privateFallback)) return null;
+  return h(
+    "Column",
+    { tw: "gap-2 w-full min-w-0" },
+    error
+      ? h(
+          "Row",
+          { tw: "gap-2 py-2 px-2.5 rounded-lg bg-surfaceHover items-center w-full min-w-0" },
+          Icon("alert", 14, K.down),
+          TX(error, { tw: "text-xs min-w-0 shrink grow leading-[1.3]" }),
+          h(
+            "Row",
+            {
+              tw: "py-0.75 px-2 rounded-[5px] cursor-pointer shrink-0 hover:bg-surfacePressed",
+              label: t.retry,
+              onClick: launchRefresh,
+            },
+            TX(t.retry, { tw: "text-xs font-medium" })
+          )
+        )
+      : null,
+    prof && prof.privateFallback
+      ? h(
+          "Row",
+          { tw: "gap-2 py-2 px-2.5 rounded-lg bg-surfaceHover items-center w-full min-w-0" },
+          Icon("lock", 13, K.warn),
+          TX(t.privateFallbackNotice, { tw: "text-[11px] text-textMuted min-w-0 shrink grow leading-[1.35]" })
+        )
+      : null
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Tab 1: Overview Components
+// ---------------------------------------------------------------------------
+
+function TodayHeroCard(prof) {
+  const t = T();
+  const { todayKey, todayDay, latestDay } = findTodayAndLatest(prof);
+  const tok = num(todayDay && todayDay.totals && todayDay.totals.tokens, 0);
+  const cost = num(todayDay && todayDay.totals && todayDay.totals.cost, 0);
+  const clients = extractDayClients(todayDay);
+  const msgs = dayMessageCount(todayDay, clients);
+
+  return h(
+    "Column",
+    {
+      tw: "gap-3 py-1 px-0.5 w-full min-w-0",
+    },
+    // 1. Top Header: Sun Icon + Today + Formatted Date
+    h(
+      "Row",
+      { tw: "items-center gap-2 w-full min-w-0" },
+      Icon("sun", 15, "[#10b981]"),
+      TX("Today", { tw: "text-[13px] font-bold text-[#10b981] shrink-0" }),
+      h("Spacer"),
+      TX(formatPrettyDate(todayKey), { tw: "text-xs text-textMuted tabular-nums shrink-0" })
+    ),
+    // 2. Hero Figure (187.4M tokens) + Today Rank Badge (🏆 #61 today)
+    h(
+      "Row",
+      { tw: "items-center justify-between gap-2 w-full min-w-0" },
+      h(
+        "Row",
+        { tw: "items-end gap-1.5 min-w-0 shrink", tooltip: `${comma(tok)} tokens` },
+        TX(formatTokens(tok, 1), {
+          tw: "text-3xl font-bold tabular-nums leading-none tracking-[-0.5px]",
+          contentTransition: { numeric: true },
+        }),
+        TX("tokens", { tw: "text-sm text-textMuted pb-0.5 shrink-0" })
+      ),
+      todayRank
+        ? h(
+            "Row",
+            {
+              tw: "items-center gap-1 py-1 px-2.5 rounded-full bg-[#10b9811a] shrink-0",
+              tooltip: `Rank #${todayRank} on today's leaderboard`,
+            },
+            Icon("trophy", 12, "[#10b981]"),
+            TX(`#${comma(todayRank)}`, { tw: "text-xs font-bold text-[#10b981] tabular-nums" }),
+            TX("today", { tw: "text-[11px] text-[#10b981]" })
+          )
+        : null
+    ),
+    // 3. Sub-metrics: Cost & Messages
+    h(
+      "Grid",
+      { tw: "grid-cols-2 gap-3 w-full min-w-0 pt-0.5" },
+      h(
+        "Column",
+        { tw: "gap-0.5 min-w-0" },
+        TX(formatCost(cost, false), { tw: "text-[13px] font-bold tabular-nums truncate" }),
+        TX("Cost", { tw: "text-[10.5px] text-textMuted" })
+      ),
+      h(
+        "Column",
+        { tw: "gap-0.5 min-w-0" },
+        TX(comma(msgs), { tw: "text-[13px] font-bold tabular-nums truncate" }),
+        TX("Messages", { tw: "text-[10.5px] text-textMuted" })
+      )
+    ),
+    // 4. TOKEN CATEGORIES
+    todayDay ? renderDayTokenCategories(todayDay, "today") : null,
+    // 5. CLIENTS & MODELS
+    clients.length > 0 ? renderDayClientsAndModels(clients, "today") : null,
+    // Fallback when today is 0
+    tok === 0
+      ? h(
+          "Row",
+          { tw: "items-center justify-between pt-0.5 w-full min-w-0" },
+          TX(
+            latestDay
+              ? t.latestActive(
+                  latestDay.date,
+                  formatTokens(latestDay.totals && latestDay.totals.tokens, 1),
+                  formatCost(latestDay.totals && latestDay.totals.cost, false)
+                )
+              : t.todayEmpty,
+            { tw: "text-[11px] text-textMuted truncate" }
+          )
+        )
+      : null
+  );
+}
+
+function SummaryGrid(prof) {
+  const t = T();
+  const st = prof.stats;
+  const isAll = activePeriod === "all";
+  const avgCost = st.activeDays > 0 ? st.totalCost / st.activeDays : 0;
+  const cliVer = prof.submissionFreshness && str(prof.submissionFreshness.cliVersion);
+  const updAge = formatAge(prof.updatedAt);
+
+  const card = (iconName, iconColor, tintHex, label, value, sub, tip) =>
+    h(
+      "Column",
+      {
+        tw: `justify-between gap-1.5 py-2.5 px-3 rounded-xl border border-${cardBorder()} bg-background min-w-0`,
+        linearGradient: { from: `${tintHex}12`, to: "background", angle: 135 },
+        ...(tip ? { tooltip: tip } : {}),
+      },
+      h(
+        "Row",
+        { tw: "items-center w-full min-w-0" },
+        TX(label, { tw: "text-[11px] font-medium text-textMuted truncate min-w-0 shrink grow" }),
+        Icon(iconName, 12, iconColor)
+      ),
+      TX(value, {
+        tw: "text-lg font-bold tabular-nums leading-tight truncate",
+        contentTransition: { numeric: true },
+      }),
+      TX(sub, { tw: "text-[10px] text-textMuted tabular-nums truncate w-full" })
+    );
+
+  return h(
+    "Grid",
+    { tw: "grid-cols-2 gap-2 w-full min-w-0" },
+    card(
+      "layers",
+      "[#3b82f6]",
+      "#3b82f6",
+      isAll ? t.totalTokens : t.periodTokens,
+      formatTokens(st.totalTokens, 2),
+      t.ioSub(formatTokens(st.inputTokens, 1), formatTokens(st.outputTokens, 1)),
+      `${comma(st.totalTokens)} tokens`
+    ),
+    card(
+      "coins",
+      "[#10b981]",
+      "#10b981",
+      isAll ? t.totalCost : t.periodCost,
+      formatCost(st.totalCost, false),
+      t.dailyAvgSub(formatCost(avgCost, false)),
+      formatCost(st.totalCost, false)
+    ),
+    card(
+      "calendar",
+      "[#8b5cf6]",
+      "#8b5cf6",
+      t.activeDays,
+      comma(st.activeDays),
+      t.sessionsSub(st.sessionCount),
+      `${st.activeDays} active days`
+    ),
+    card(
+      "upload",
+      "[#f59e0b]",
+      "#f59e0b",
+      t.submissions,
+      comma(st.submissionCount),
+      t.updatedSub(updAge, cliVer),
+      prof.updatedAt ? `Updated ${prof.updatedAt}` : ""
+    )
+  );
+}
+
+function TokenMixCard(prof) {
+  const t = T();
+  const st = prof.stats;
+  const rows = [
+    { ...MIX_DEFS[0], value: Math.max(0, st.inputTokens) },
+    { ...MIX_DEFS[1], value: Math.max(0, st.outputTokens) },
+    { ...MIX_DEFS[2], value: Math.max(0, st.cacheReadTokens) },
+    { ...MIX_DEFS[3], value: Math.max(0, st.cacheWriteTokens) },
+    { ...MIX_DEFS[4], value: Math.max(0, st.reasoningTokens) },
+  ];
+
+  const sum = rows.reduce((acc, r) => acc + r.value, 0);
+  if (sum <= 0) return null;
+  const nonZero = rows.filter(r => r.value > 0);
+
+  return h(
+    "Column",
+    { tw: `gap-2.5 py-3 px-3.5 rounded-xl border border-${cardBorder()} bg-background w-full min-w-0` },
+    h(
+      "Row",
+      { tw: "items-center gap-1.5 w-full min-w-0" },
+      Icon("pie", 13, K.muted),
+      TX(t.tokenMixTitle, { tw: "text-xs font-bold text-textMuted" }),
+      h("Spacer"),
+      TX(formatTokens(sum, 2), { tw: "text-[11px] font-mono text-textMuted tabular-nums" })
+    ),
+    // Proportional Bar
+    h(
+      "Row",
+      { tw: "gap-[2px] h-2 rounded-full overflow-hidden w-full bg-border" },
+      nonZero.map(r =>
+        h("Box", {
+          key: `mix-bar-${r.key}`,
+          tw: `h-2 rounded-full bg-[${r.color}]`,
+          grow: Math.max((r.value / sum) * 100, 1.5),
+          basis: 0,
+          tooltip: `${r.labelEn}: ${formatTokens(r.value, 2)} (${formatPercent((r.value / sum) * 100)})`,
+        })
+      )
+    ),
+    // 5-row vertical breakdown
+    h(
+      "Column",
+      { tw: "gap-1.5 w-full min-w-0" },
+      rows.map(r => {
+        const share = sum > 0 ? (r.value / sum) * 100 : 0;
+        return h(
+          "Row",
+          { key: `mix-leg-${r.key}`, tw: "items-center gap-2 w-full min-w-0" },
+          h("Box", { tw: `w-2 h-2 rounded-full shrink-0 bg-[${r.color}]` }),
+          TX(r.labelEn, { tw: "text-xs text-text truncate min-w-0 shrink grow" }),
+          TX(formatTokens(r.value, 1), { tw: "text-xs font-bold tabular-nums shrink-0" }),
+          TX(formatPercent(share), { tw: "text-[11px] text-textMuted tabular-nums w-12 text-end shrink-0" })
+        );
+      })
+    )
+  );
+}
+
+function DailyTrendCard(prof) {
+  const t = T();
+  const allDays = Array.isArray(prof.contributions) ? prof.contributions : [];
+  if (allDays.length < 2) return null;
+
+  const limit = activePeriod === "week" ? 7 : 30;
+  const sliced = allDays.slice(-limit);
+  const isCost = trendMetric === "cost";
+  const color = isCost ? "#10b981" : "#2F8FFF";
+
+  const points = [];
+  for (const d of sliced) {
+    const ts = Date.parse(`${d.date}T00:00:00Z`);
+    if (!Number.isFinite(ts)) continue;
+    const tok = num(d.totals && d.totals.tokens, 0);
+    const cost = num(d.totals && d.totals.cost, 0);
+    const yVal = isCost ? Number(cost.toFixed(2)) : Number((tok / 1e6).toFixed(2));
+    points.push({
+      x: ts,
+      y: yVal,
+      label: d.date,
+      valueLabel: isCost
+        ? `${formatCost(cost, false)} (${formatTokens(tok, 1)})`
+        : `${formatTokens(tok, 2)} (${formatCost(cost, false)})`,
+    });
+  }
+  points.sort((a, b) => a.x - b.x);
+  if (points.length < 2) return null;
+
+  return h(
+    "Column",
+    { tw: `gap-2 py-3 px-3.5 rounded-xl border border-${cardBorder()} bg-background w-full min-w-0` },
+    h(
+      "Row",
+      { tw: "items-center gap-1.5 w-full min-w-0" },
+      Icon("chart", 13, K.muted),
+      TX(t.trendTitle, { tw: "text-xs font-bold text-textMuted shrink-0" }),
+      h("Spacer"),
+      CompactToggle(
+        [
+          { label: t.metricTokens, value: "tokens" },
+          { label: t.metricCost, value: "cost" },
+        ],
+        trendMetric,
+        v => {
+          trendMetric = v === "cost" ? "cost" : "tokens";
+          localStorage.setItem("tokens.trendMetric", trendMetric);
+          $metrix.invalidate();
+        },
+        "seg-trend"
+      )
+    ),
+    h("Chart", {
+      key: `trend-chart-${activePeriod}-${trendMetric}`,
+      type: "area",
+      curve: "monotone",
+      xKind: "time",
+      height: 120,
+      hover: true,
+      tw: "w-full",
+      series: [
+        {
+          name: isCost ? "Cost (USD)" : "Tokens (M)",
+          color,
+          fill: { from: 0.28, to: 0.02 },
+          points,
+        },
+      ],
+    })
+  );
+}
+
+function HeatmapCard(prof) {
+  const t = T();
+  const baseProf = allTimeProfile() || prof;
+  const contribs = (baseProf && baseProf.contributions) || [];
+  if (!contribs.length) return null;
+
+  const byDate = new Map();
+  for (const c of contribs) {
+    if (c && c.date) byDate.set(c.date, c);
+  }
+
+  const now = new Date();
+  const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const endCalendarUTC = new Date(todayUTC);
+  endCalendarUTC.setUTCDate(endCalendarUTC.getUTCDate() + (6 - endCalendarUTC.getUTCDay())); // Saturday align
+  const weeksCount = 53;
+  const startUTC = new Date(endCalendarUTC);
+  startUTC.setUTCDate(endCalendarUTC.getUTCDate() - (weeksCount * 7 - 1)); // Sunday align (53 weeks)
+  const rangeStartKey = startUTC.toISOString().slice(0, 10);
+  const todayKeyUTC = todayUTC.toISOString().slice(0, 10);
+
+  const dark = isDarkTheme();
+  const grades = dark
+    ? ["[#22262c]", "[#0e4429]", "[#006d32]", "[#26a641]", "[#39d353]"]
+    : ["[#ebedf0]", "[#9be9a8]", "[#40c463]", "[#30a14e]", "[#216e39]"];
+
+  // Compute intensity from daily token counts (P92 of active days in 53-week window)
+  const windowTokens = [];
+  for (let w = 0; w < weeksCount; w++) {
+    for (let d = 0; d < 7; d++) {
+      const cur = new Date(startUTC);
+      cur.setUTCDate(startUTC.getUTCDate() + w * 7 + d);
+      const dKey = cur.toISOString().slice(0, 10);
+      if (dKey > todayKeyUTC) continue;
+      const entry = byDate.get(dKey);
+      const tok = num(entry && entry.totals && entry.totals.tokens, 0);
+      if (tok > 0) windowTokens.push(tok);
+    }
+  }
+  windowTokens.sort((a, b) => a - b);
+  const refMaxTokens =
+    windowTokens.length >= 5
+      ? windowTokens[Math.min(windowTokens.length - 1, Math.floor(windowTokens.length * 0.92))]
+      : windowTokens.length > 0
+      ? windowTokens[windowTokens.length - 1]
+      : 0;
+
+  let activeInGrid = 0;
+  let lastMonth = -1;
+  let lastMonthWeek = -10;
+  const weekColumns = [];
+  for (let w = 0; w < weeksCount; w++) {
+    const weekStart = new Date(startUTC);
+    weekStart.setUTCDate(startUTC.getUTCDate() + w * 7);
+    const mIdx = weekStart.getUTCMonth();
+    let monthLabel = "";
+    if (mIdx !== lastMonth) {
+      lastMonth = mIdx;
+      if (w - lastMonthWeek >= 3) {
+        monthLabel = MONTHS_SHORT[mIdx] || "";
+        lastMonthWeek = w;
+      }
+    }
+
+    const dayCells = [];
+    for (let d = 0; d < 7; d++) {
+      const cur = new Date(startUTC);
+      cur.setUTCDate(startUTC.getUTCDate() + w * 7 + d);
+      const dKey = cur.toISOString().slice(0, 10);
+      if (dKey > todayKeyUTC) {
+        dayCells.push(
+          h("Box", {
+            key: `hm-${dKey}`,
+            tw: `w-[10px] h-[10px] rounded-[2px] bg-${grades[0]}`,
+            tooltip: dKey,
+          })
+        );
+        continue;
+      }
+      const entry = byDate.get(dKey);
+      const tok = num(entry && entry.totals && entry.totals.tokens, 0);
+      const cost = num(entry && entry.totals && entry.totals.cost, 0);
+      const level =
+        tok <= 0 || refMaxTokens <= 0
+          ? 0
+          : tok >= refMaxTokens * 0.75
+          ? 4
+          : tok >= refMaxTokens * 0.5
+          ? 3
+          : tok >= refMaxTokens * 0.25
+          ? 2
+          : 1;
+      if (tok > 0) activeInGrid++;
+      const isSel = selectedDate === dKey;
+      dayCells.push(
+        h("Box", {
+          key: `hm-${dKey}`,
+          tw: `w-[10px] h-[10px] rounded-[2px] bg-${grades[level]} cursor-pointer ${
+            isSel ? "border border-text" : ""
+          }`,
+          tooltip: `${dKey} · ${formatTokens(tok, 1)} · ${formatCost(cost, false)}`,
+          onClick: () => {
+            selectedDate = selectedDate === dKey ? null : dKey;
+            $metrix.invalidate();
+          },
+        })
+      );
+    }
+    weekColumns.push(
+      h(
+        "Column",
+        { key: `hm-w-${w}`, tw: "gap-[3px] items-start shrink-0" },
+        h(
+          "Box",
+          { tw: "w-[10px] h-[13px]" },
+          monthLabel
+            ? TX(monthLabel, {
+                tw: "text-[9.5px] text-textMuted leading-none whitespace-nowrap",
+              })
+            : null
+        ),
+        ...dayCells
+      )
+    );
+  }
+
+  const inspectedDay = selectedDate ? byDate.get(selectedDate) : null;
+  const inspectedClients = inspectedDay ? extractDayClients(inspectedDay) : [];
+
+  return h(
+    "Column",
+    { tw: `gap-2.5 py-3 px-3.5 rounded-xl border border-${cardBorder()} bg-background w-full min-w-0` },
+    // Header: Icon + Title
+    h(
+      "Row",
+      { tw: "items-center gap-1.5 w-full min-w-0" },
+      Icon("grid", 13, K.muted),
+      TX(t.heatmapTitle, { tw: "text-xs font-bold text-textMuted shrink-0" })
+    ),
+    // Horizontally Scrollable 53-week Calendar Grid
+    h(
+      "ScrollHorizontal",
+      { key: "hm-scroll-53w", direction: "rtl", tw: "w-full pb-3" },
+      h("Row", { direction: "ltr", tw: "gap-[3px] items-end" }, weekColumns)
+    ),
+    // Legend Row
+    h(
+      "Row",
+      { tw: "items-center justify-between w-full min-w-0" },
+      TX(t.heatmapActiveDays(activeInGrid), {
+        tw: "text-[11px] text-textMuted tabular-nums",
+      }),
+      h(
+        "Row",
+        { tw: "items-center gap-1 shrink-0" },
+        TX("Less", { tw: "text-[10px] text-textMuted" }),
+        ...grades.map((g, i) =>
+          h("Box", { key: `lg-${i}`, tw: `w-[9px] h-[9px] rounded-[2px] bg-${g}` })
+        ),
+        TX("More", { tw: "text-[10px] text-textMuted" })
+      )
+    ),
+    inspectedDay
+      ? h(
+          "Column",
+          { tw: "gap-2 pt-1 w-full min-w-0" },
+          Line(),
+          h(
+            "Row",
+            { tw: "items-center justify-between w-full min-w-0" },
+            TX(formatPrettyDate(selectedDate), { tw: "text-xs font-bold" }),
+            TX(
+              `${formatTokens(inspectedDay.totals && inspectedDay.totals.tokens, 1)} · ${formatCost(
+                inspectedDay.totals && inspectedDay.totals.cost,
+                false
+              )}`,
+              { tw: "text-xs font-bold text-[#10b981] tabular-nums" }
+            )
+          ),
+          renderDayTokenCategories(inspectedDay, `hm-${selectedDate}`),
+          renderDayClientsAndModels(inspectedClients, `hm-${selectedDate}`)
+        )
+      : null
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Tab 2: Models & Devices Components
+// ---------------------------------------------------------------------------
+
+function ClientsUsedCard(prof) {
+  const t = T();
+  const clients = Array.isArray(prof.clients) ? prof.clients : [];
+  if (!clients.length) return null;
+  return h(
+    "Column",
+    { tw: `gap-2 py-3 px-3.5 rounded-xl border border-${cardBorder()} bg-background w-full min-w-0` },
+    h(
+      "Row",
+      { tw: "items-center gap-1.5 w-full min-w-0" },
+      Icon("layers", 13, K.muted),
+      TX(t.clientsUsedTitle, { tw: "text-xs font-bold text-textMuted" }),
+      h("Spacer"),
+      TX(String(clients.length), { tw: "text-[11px] font-mono text-textMuted tabular-nums" })
+    ),
+    h(
+      "Row",
+      { tw: "flex-wrap gap-1.5 items-center w-full" },
+      clients.map(cid =>
+        h(
+          "Row",
+          {
+            key: `cl-pill-${cid}`,
+            tw: "items-center gap-1.5 py-1 px-2.5 rounded-full bg-surfaceHover shrink-0",
+          },
+          ClientIcon(cid, 14),
+          TX(clientName(cid), { tw: "text-[11px] font-medium" })
+        )
+      )
+    )
+  );
+}
+
+function ModelsListCard(prof) {
+  const t = T();
+  const rawModels = Array.isArray(prof.modelUsage) ? prof.modelUsage : [];
+  const sorted = rawModels
+    .slice()
+    .sort((a, b) =>
+      modelSort === "tokens"
+        ? num(b.tokens, 0) - num(a.tokens, 0) || num(b.cost, 0) - num(a.cost, 0)
+        : num(b.cost, 0) - num(a.cost, 0) || num(b.tokens, 0) - num(a.tokens, 0)
+    );
+
+  const totalMetric = sorted.reduce(
+    (acc, m) => acc + (modelSort === "tokens" ? num(m.tokens, 0) : num(m.cost, 0)),
+    0
+  );
+  const visibleModels = showAllModels ? sorted : sorted.slice(0, 6);
+
+  return h(
+    "Column",
+    { tw: `gap-3 py-3 px-3.5 rounded-xl border border-${cardBorder()} bg-background w-full min-w-0` },
+    // Card Title Bar
+    h(
+      "Row",
+      { tw: "items-center gap-1.5 w-full min-w-0" },
+      Icon("cpu", 13, K.muted),
+      TX(t.modelsTitle, { tw: "text-xs font-bold text-textMuted shrink-0" }),
+      h("Spacer"),
+      CompactToggle(
+        [
+          { label: t.sortByTokens, value: "tokens" },
+          { label: t.sortByCost, value: "cost" },
+        ],
+        modelSort,
+        v => {
+          modelSort = v === "tokens" ? "tokens" : "cost";
+          localStorage.setItem("tokens.modelSort", modelSort);
+          $metrix.invalidate();
+        },
+        "seg-model-sort"
+      )
+    ),
+    sorted.length === 0
+      ? h(
+          "Row",
+          { tw: "py-4 items-center justify-center w-full" },
+          TX(t.noModels, { tw: "text-xs text-textMuted" })
+        )
+      : h(
+          "Column",
+          { tw: "gap-2.5 w-full min-w-0" },
+          ...visibleModels.map((m, idx) => {
+            const tok = num(m.tokens, 0);
+            const cost = num(m.cost, 0);
+            const val = modelSort === "tokens" ? tok : cost;
+            const share = totalMetric > 0 ? clampPct((val / totalMetric) * 100) : clampPct(m.percentage);
+
+            return h(
+              "Column",
+              { key: `mod-${m.model || idx}`, tw: "gap-1.5 w-full min-w-0" },
+              h(
+                "Row",
+                { tw: "items-center gap-2 w-full min-w-0" },
+                ModelIcon(m.model, 15),
+                TX(str(m.model), {
+                  tw: "text-[12.5px] font-medium truncate min-w-0 shrink grow",
+                  tooltip: str(m.model),
+                }),
+                TX(modelSort === "tokens" ? formatTokens(tok, 1) : formatCost(cost, true), {
+                  tw: "text-xs font-semibold tabular-nums shrink-0",
+                  tooltip: `${comma(tok)} tokens · ${formatCost(cost, false)}`,
+                }),
+                TX(`${share.toFixed(1)}%`, {
+                  tw: "text-xs text-textMuted tabular-nums w-11 text-end shrink-0",
+                })
+              ),
+              h(
+                "Row",
+                { tw: "w-full h-1 rounded-full bg-surfaceHover overflow-hidden" },
+                h("Box", {
+                  tw: "h-1 rounded-full bg-[#10b981]",
+                  width: `${Math.max(share, 1.5)}%`,
+                })
+              )
+            );
+          }),
+          sorted.length > 6
+            ? h(
+                "Row",
+                { tw: "pt-1 items-center justify-center w-full" },
+                h(
+                  "Row",
+                  {
+                    tw: `py-1 px-3.5 rounded-full border border-${cardBorder()} cursor-pointer items-center justify-center hover:bg-surfaceHover`,
+                    onClick: () => {
+                      showAllModels = !showAllModels;
+                      $metrix.invalidate();
+                    },
+                  },
+                  TX(showAllModels ? "Show Less" : `Show All ${sorted.length}`, {
+                    tw: "text-xs font-medium text-[#10b981] tabular-nums",
+                  })
+                )
+              )
+            : null
+        )
+  );
+}
+
+function DevicesListCard() {
+  const t = T();
+  const totalDevTokens = devicesList.reduce((acc, d) => acc + Math.max(0, num(d.totalTokens, 0)), 0);
+
+  return h(
+    "Column",
+    { tw: `gap-3 py-3 px-3.5 rounded-xl border border-${cardBorder()} bg-background w-full min-w-0` },
+    // Card Title Bar
+    h(
+      "Row",
+      { tw: "items-center gap-1.5 w-full min-w-0" },
+      Icon("laptop", 13, K.muted),
+      TX(t.devicesTitle, { tw: "text-xs font-bold text-textMuted" }),
+      h("Spacer"),
+      TX(t.devicesCount(devicesList.length), {
+        tw: "text-[11px] text-textMuted tabular-nums",
+      })
+    ),
+    devicesList.length === 0
+      ? h(
+          "Row",
+          { tw: "py-4 items-center justify-center w-full" },
+          TX(t.noDevices, { tw: "text-xs text-textMuted" })
+        )
+      : h(
+          "Column",
+          { tw: "gap-3 w-full min-w-0" },
+          ...devicesList.map(d => {
+            const devShare =
+              totalDevTokens > 0 ? clampPct((Math.max(0, num(d.totalTokens, 0)) / totalDevTokens) * 100) : 0;
+            const daysLabel = `${comma(d.activeDays)} ${d.activeDays === 1 ? "day" : "days"}`;
+            return h(
+              "Column",
+              {
+                key: `dev-${d.id}`,
+                tw: "gap-1.5 py-1 px-1 -mx-1 rounded-lg cursor-pointer w-full min-w-0 hover:bg-surfaceHover",
+                onClick: () => selectDevice(d.id),
+              },
+              h(
+                "Row",
+                { tw: "items-center gap-2 w-full min-w-0" },
+                h(
+                  "Column",
+                  { tw: "gap-0.5 min-w-0 shrink grow" },
+                  TX(d.displayName, { tw: "text-[13px] font-semibold truncate" }),
+                  TX(
+                    [
+                      d.cloudSessions != null ? t.cloudSessionsCount(d.cloudSessions) : "",
+                      t.lastSubmitted(formatAge(d.lastSubmittedAt)),
+                    ]
+                      .filter(Boolean)
+                      .join(" · "),
+                    { tw: "text-[11px] text-textMuted truncate tabular-nums" }
+                  )
+                ),
+                h(
+                  "Column",
+                  { tw: "items-end gap-0.5 shrink-0" },
+                  TX(formatTokens(d.totalTokens, 1), {
+                    tw: "text-[13px] font-bold tabular-nums",
+                    tooltip: `${comma(d.totalTokens)} tokens`,
+                  }),
+                  TX(formatCost(d.totalCost, true), {
+                    tw: "text-[11px] text-textMuted tabular-nums",
+                    tooltip: formatCost(d.totalCost, false),
+                  })
+                )
+              ),
+              h(
+                "Row",
+                { tw: "items-center gap-3 w-full min-w-0" },
+                h(
+                  "Row",
+                  { tw: "grow h-1 rounded-full bg-surfaceHover overflow-hidden min-w-0" },
+                  h("Box", {
+                    tw: "h-1 rounded-full bg-[#10b981]",
+                    width: `${Math.max(devShare, 2)}%`,
+                  })
+                ),
+                TX(daysLabel, {
+                  tw: "text-[11px] text-textMuted tabular-nums shrink-0",
+                })
+              )
+            );
+          })
+        )
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Secondary View: Single Device Detail
+// ---------------------------------------------------------------------------
+
+function DeviceDetailView() {
+  const t = T();
+  const fallbackDev = devicesList.find(d => d.id === selectedDeviceId);
+
+  if (String(selectedDeviceId).startsWith("cloud:") && fallbackDev) {
+    const sessions = Array.isArray(fallbackDev.sessions) ? fallbackDev.sessions : [];
+    return h(
+      "Scroll",
+      { tw: "grow min-h-0 w-full" },
+      h(
+        "Column",
+        { tw: "gap-3 pt-3.5 pr-4 pb-4 pl-4 w-full min-w-0" },
+        h(
+          "Grid",
+          { tw: "grid-cols-2 gap-2 w-full min-w-0" },
+          h(
+            "Column",
+            { tw: `gap-1 py-2.5 px-3 rounded-xl border border-${cardBorder()} bg-background min-w-0` },
+            TX(t.totalTokens, { tw: "text-[11px] text-textMuted" }),
+            TX(formatTokens(fallbackDev.totalTokens, 2), { tw: "text-lg font-bold tabular-nums" }),
+            TX(
+              t.ioSub(formatTokens(fallbackDev.inputTokens, 1), formatTokens(fallbackDev.outputTokens, 1)),
+              { tw: "text-[10px] text-textMuted tabular-nums truncate" }
+            )
+          ),
+          h(
+            "Column",
+            { tw: `gap-1 py-2.5 px-3 rounded-xl border border-${cardBorder()} bg-background min-w-0` },
+            TX(t.totalCost, { tw: "text-[11px] text-textMuted" }),
+            TX(formatCost(fallbackDev.totalCost, false), { tw: "text-lg font-bold text-[#10b981] tabular-nums" }),
+            TX(
+              `${t.cloudSessionsCount(fallbackDev.cloudSessions || sessions.length)} · ${t.daysActive(fallbackDev.activeDays)}`,
+              { tw: "text-[10px] text-textMuted tabular-nums truncate" }
+            )
+          )
+        ),
+        sessions.length > 0
+          ? h(
+              "Column",
+              { tw: `gap-1.5 py-3 px-3.5 rounded-xl border border-${cardBorder()} bg-background w-full min-w-0` },
+              TX(t.cloudSessionsListTitle, { tw: "text-xs font-bold pb-1" }),
+              ...sessions.map((s, idx) =>
+                h(
+                  "Column",
+                  { key: `cs-${s.id || idx}`, tw: "w-full min-w-0" },
+                  Line(),
+                  h(
+                    "Row",
+                    { tw: "items-center gap-2 py-1.5 w-full min-w-0" },
+                    TX(`#${idx + 1} · ${String(s.deviceKey || "").slice(-8)}`, {
+                      tw: "text-xs font-mono text-textMuted shrink-0",
+                    }),
+                    TX(t.lastSubmitted(formatAge(s.lastSubmittedAt)), {
+                      tw: "text-[10.5px] text-textMuted truncate min-w-0 shrink grow tabular-nums",
+                    }),
+                    TX(formatCost(s.totalCost, false), {
+                      tw: "text-[11px] font-semibold text-[#10b981] tabular-nums shrink-0",
+                    }),
+                    TX(formatTokens(s.totalTokens, 1), {
+                      tw: "text-xs font-bold tabular-nums shrink-0 w-14 text-end",
+                    })
+                  )
+                )
+              )
+            )
+          : null
+      )
+    );
+  }
+
+  const entry = deviceDetailCache.get(selectedDeviceId);
+
+  if (!entry || (entry.loading && !entry.data)) {
+    return h(
+      "Scroll",
+      { tw: "grow min-h-0 w-full" },
+      h(
+        "Column",
+        { tw: "gap-3 pt-3.5 pr-4 pb-4 pl-4 w-full" },
+        bone(388, 92, { tw: "rounded-xl w-full" }),
+        bone(388, 160, { tw: "rounded-xl w-full" }),
+        bone(388, 180, { tw: "rounded-xl w-full" })
+      )
+    );
+  }
+
+  if (entry.error && !entry.data) {
+    return Problem(t.connErrTitle, entry.error, true, () => loadDeviceDetail(selectedDeviceId));
+  }
+
+  const data = entry.data || {};
+  const totals = data.totals || fallbackDev || {};
+  const contribs = Array.isArray(data.contributions) ? data.contributions : [];
+
+  const points = contribs
+    .slice(0, 30)
+    .map(c => {
+      const ts = Date.parse(`${c.date}T00:00:00Z`);
+      const tok = num(c.tokens, 0);
+      const cost = num(c.cost, 0);
+      return {
+        x: ts,
+        y: Number((tok / 1e6).toFixed(2)),
+        label: c.date,
+        valueLabel: `${formatTokens(tok, 2)} (${formatCost(cost, false)})`,
+      };
+    })
+    .filter(p => Number.isFinite(p.x))
+    .sort((a, b) => a.x - b.x);
+
+  return h(
+    "Scroll",
+    { tw: "grow min-h-0 w-full" },
+    h(
+      "Column",
+      { tw: "gap-3 pt-3.5 pr-4 pb-4 pl-4 w-full min-w-0" },
+      // Summary Card
+      h(
+        "Grid",
+        { tw: "grid-cols-2 gap-2 w-full min-w-0" },
+        h(
+          "Column",
+          { tw: `gap-1 py-2.5 px-3 rounded-xl border border-${cardBorder()} bg-background min-w-0` },
+          TX(t.totalTokens, { tw: "text-[11px] text-textMuted" }),
+          TX(formatTokens(totals.totalTokens, 2), { tw: "text-lg font-bold tabular-nums" }),
+          TX(
+            t.ioSub(formatTokens(totals.inputTokens, 1), formatTokens(totals.outputTokens, 1)),
+            { tw: "text-[10px] text-textMuted tabular-nums truncate" }
+          )
+        ),
+        h(
+          "Column",
+          { tw: `gap-1 py-2.5 px-3 rounded-xl border border-${cardBorder()} bg-background min-w-0` },
+          TX(t.totalCost, { tw: "text-[11px] text-textMuted" }),
+          TX(formatCost(totals.totalCost, false), { tw: "text-lg font-bold text-[#10b981] tabular-nums" }),
+          TX(t.daysActive(num(totals.activeDays, 0)), { tw: "text-[10px] text-textMuted tabular-nums" })
+        )
+      ),
+      // Device Chart
+      points.length >= 2
+        ? h(
+            "Column",
+            { tw: `gap-2 py-3 px-3.5 rounded-xl border border-${cardBorder()} bg-background w-full min-w-0` },
+            TX(t.trendTitle, { tw: "text-xs font-bold" }),
+            h("Chart", {
+              key: `dev-chart-${selectedDeviceId}`,
+              type: "area",
+              curve: "monotone",
+              xKind: "time",
+              height: 118,
+              hover: true,
+              tw: "w-full",
+              series: [
+                {
+                  name: "Tokens (M)",
+                  color: "#8b5cf6",
+                  fill: { from: 0.28, to: 0.02 },
+                  points,
+                },
+              ],
+            })
+          )
+        : null,
+      // Recent Days Table
+      contribs.length > 0
+        ? h(
+            "Column",
+            { tw: `gap-1.5 py-3 px-3.5 rounded-xl border border-${cardBorder()} bg-background w-full min-w-0` },
+            TX(t.deviceRecentDays, { tw: "text-xs font-bold pb-1" }),
+            ...contribs.slice(0, 14).map(c =>
+              h(
+                "Column",
+                { key: `dc-${c.date}`, tw: "w-full min-w-0" },
+                Line(),
+                h(
+                  "Row",
+                  { tw: "items-center gap-2 py-1 w-full min-w-0" },
+                  TX(c.date, { tw: "text-xs font-mono tabular-nums shrink-0" }),
+                  TX(
+                    t.ioSub(formatTokens(c.inputTokens, 1), formatTokens(c.outputTokens, 1)),
+                    { tw: "text-[10.5px] text-textMuted truncate min-w-0 shrink grow tabular-nums" }
+                  ),
+                  TX(formatCost(c.cost, false), {
+                    tw: "text-[11px] font-semibold text-[#10b981] tabular-nums shrink-0",
+                  }),
+                  TX(formatTokens(c.tokens, 1), {
+                    tw: "text-xs font-bold tabular-nums shrink-0 w-14 text-end",
+                  })
+                )
+              )
+            )
+          )
+        : null
+    )
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Empty / Error / Skeleton States & Root Views
+// ---------------------------------------------------------------------------
+
+function Problem(title, detail, retry, onRetry = launchRefresh) {
+  const t = T();
+  return h(
+    "Column",
+    { tw: "grow items-center justify-center gap-2 py-8 px-8" },
+    Icon("alert", 22, K.down),
+    TX(title, { tw: "text-sm font-semibold text-center" }),
+    TX(detail, { tw: "text-xs text-textMuted text-center leading-[1.35]" }),
+    retry
+      ? h("Row", { tw: "mt-1.5" }, h("Button", { key: "btn-retry", onClick: onRetry }, t.retry))
+      : null
+  );
+}
+
+function SetupGuide() {
+  const t = T();
+  return h(
+    "Column",
+    { tw: "grow items-center justify-center gap-2.5 py-8 px-8" },
+    h(
+      "Column",
+      { tw: "w-11 h-11 rounded-xl bg-accent items-center justify-center mb-1" },
+      Icon("brand", 24, "accentText")
+    ),
+    TX(t.setupTitle, { tw: "text-base font-semibold text-center" }),
+    TX(t.setupDesc, { tw: "text-xs text-textMuted text-center leading-[1.4]" })
+  );
+}
+
+function Skeleton() {
+  return h(
+    "Column",
+    { tw: "gap-3 pt-3.5 pr-4 pb-4 pl-4 w-full" },
+    bone(388, 28, { tw: "rounded-md w-full" }),
+    bone(388, 110, { tw: "rounded-xl w-full" }),
+    h(
+      "Grid",
+      { tw: "grid-cols-2 gap-2 w-full" },
+      [0, 1, 2, 3].map(i => bone(180, 68, { key: `sk-g-${i}`, tw: "rounded-xl w-full" }))
+    ),
+    bone(388, 140, { tw: "rounded-xl w-full" })
+  );
+}
+
+function Body() {
+  const t = T();
+  if (inputErr) return Problem(t.invalidUrlTitle, inputErr, false);
+  if (!resolvedUsername && !loading && loadedAt > 0 && !error) return SetupGuide();
+  if (!resolvedUsername && !loading && !loadedAt) return SetupGuide();
+
+  if (selectedDeviceId) return DeviceDetailView();
+
+  const prof = currentProfile();
+  if (!prof) {
+    return error ? Problem(t.connErrTitle, error, true) : Skeleton();
+  }
+  if (prof.banned) {
+    return Problem("Tokens", t.bannedNotice(prof.banReason), false);
+  }
+
+  return h(
+    "Scroll",
+    { tw: "grow min-h-0 w-full" },
+    h(
+      "Column",
+      { tw: "gap-3 pt-3 pr-4 pb-4 pl-4 w-full min-w-0" },
+      Banner(),
+      TodayHeroCard(prof),
+      Line(),
+      PeriodHeaderBar(),
+      SummaryGrid(prof),
+      TokenMixCard(prof),
+      DailyTrendCard(prof),
+      HeatmapCard(prof),
+      ClientsUsedCard(prof),
+      ModelsListCard(prof),
+      DevicesListCard()
+    )
+  );
+}
+
+function panelTree() {
+  return h(
+    "Column",
+    {
+      preferredWidth: W,
+      preferredHeight: 620,
+      safeArea: true,
+      tw: "size-full text-[13px] text-text min-w-0 min-h-0",
+      shortcuts: {
+        "CmdOrCtrl+R": launchRefresh,
+        "CmdOrCtrl+1": () => switchPeriod("all"),
+        "CmdOrCtrl+2": () => switchPeriod("month"),
+        "CmdOrCtrl+3": () => switchPeriod("week"),
+        Escape: () => {
+          if (selectedDeviceId) {
+            selectedDeviceId = null;
+            $metrix.invalidate();
+          } else if (selectedDate) {
+            selectedDate = null;
+            $metrix.invalidate();
+          }
+        },
+      },
+    },
+    Header(),
+    Body()
+  );
+}
+
+function trayTree() {
+  const t = T();
+  const prof = currentProfile();
+  const allProf = allTimeProfile() || prof;
+  let title = "";
+  let tooltip = "Tokens";
+
+  if (prof && !prof.banned) {
+    const { todayDay } = findTodayAndLatest(prof);
+    const todayTok = num(todayDay && todayDay.totals && todayDay.totals.tokens, 0);
+    const todayCost = num(todayDay && todayDay.totals && todayDay.totals.cost, 0);
+    const totalTok = num(allProf && allProf.stats && allProf.stats.totalTokens, 0);
+    const totalCost = num(allProf && allProf.stats && allProf.stats.totalCost, 0);
+    const rank = (allProf && allProf.user && allProf.user.rank) || null;
+
+    const tTokStr = formatTokens(todayTok, 1);
+    const tCostStr = formatCost(todayCost, true);
+    const allTokStr = formatTokens(totalTok, 1);
+    const allCostStr = formatCost(totalCost, true);
+    const rankStr = rank ? `#${rank}` : "";
+
+    if (trayFormat === "today_rank") {
+      title = rankStr ? `${tTokStr} · ${rankStr}` : tTokStr;
+    } else if (trayFormat === "total_rank") {
+      title = rankStr ? `${allTokStr} · ${rankStr}` : allTokStr;
+    } else if (trayFormat === "total_cost") {
+      title = `${allTokStr} · ${allCostStr}`;
+    } else if (trayFormat === "today_only") {
+      title = tTokStr;
+    } else if (trayFormat === "cost_only") {
+      title = tCostStr;
+    } else {
+      // Default: today_cost (14.2M · $8.40)
+      title = `${tTokStr} · ${tCostStr}`;
+    }
+
+    tooltip = t.trayTooltip(
+      resolvedUsername || (prof.user && prof.user.username) || "tokens",
+      tTokStr,
+      formatCost(todayCost, false),
+      allTokStr,
+      formatCost(totalCost, false),
+      rank
+    );
+  }
+
+  return {
+    icon: "data:image/svg+xml," + encodeURIComponent(BRAND),
+    iconTemplate: true,
+    title,
+    tooltip,
+    error: error || inputErr,
+    menu: [
+      { label: t.refresh, onClick: launchRefresh, disabled: !baseURL },
+      { label: t.openProfile, onClick: () => $metrix.openURL(profileURL()) },
+      { label: t.openLeaderboard, onClick: () => $metrix.openURL(`${baseURL || "https://tokens.ci"}/leaderboard`) },
+    ],
+  };
+}
+
+export default {
+  async scheduled(env) {
+    syncInputs(env);
+    await refresh();
+  },
+
+  render(env) {
+    syncInputs(env);
+    return { tray: trayTree(), panel: panelTree() };
+  },
+
+  event(name, payload) {
+    if (
+      name === "lifecycle" &&
+      payload &&
+      payload.type === "expand" &&
+      baseURL &&
+      !inflight &&
+      Date.now() - loadedAt > 60e3
+    ) {
+      launchRefresh();
+    }
+  },
+};
+  ]]></script>
+</bar>
