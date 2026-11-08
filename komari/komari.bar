@@ -90,6 +90,7 @@ const isDarkTheme = () => {
   }
 };
 const BRAND = BRAND_DARK;
+const cardBg = () => (isDarkTheme() ? "bg-surface" : "bg-background");
 
 const ICON = {
   brand: BRAND_DARK,
@@ -1333,7 +1334,7 @@ function ClusterSummary() {
       "Column",
       {
         tw: "justify-between gap-2 py-2.5 px-3 rounded-xl border border-border min-w-0",
-        linearGradient: { from: "#10b98118", to: "surfaceHover", angle: 135 },
+        linearGradient: { from: "#10b98118", to: isDarkTheme() ? "surface" : "background", angle: 135 },
       },
       h(
         "Row",
@@ -1357,7 +1358,7 @@ function ClusterSummary() {
       "Column",
       {
         tw: "justify-between gap-2 py-2.5 px-3 rounded-xl border border-border min-w-0",
-        linearGradient: { from: "#f59e0b18", to: "surfaceHover", angle: 135 },
+        linearGradient: { from: "#f59e0b18", to: isDarkTheme() ? "surface" : "background", angle: 135 },
         tooltip: `↑ ${formatRate(s.netUp)} · ↓ ${formatRate(s.netDown)}`,
       },
       h(
@@ -1384,7 +1385,7 @@ function ClusterSummary() {
       "Column",
       {
         tw: "justify-between gap-2 py-2.5 px-3 rounded-xl border border-border min-w-0",
-        linearGradient: { from: "#8b5cf618", to: "surfaceHover", angle: 135 },
+        linearGradient: { from: "#8b5cf618", to: isDarkTheme() ? "surface" : "background", angle: 135 },
         tooltip: `↑ ${formatBytes(s.totalUp, 2)} · ↓ ${formatBytes(s.totalDown, 2)}`,
       },
       h(
@@ -1520,18 +1521,19 @@ function PingStrip(pings) {
       const loss = Math.max(0, num(p.loss, 0));
       const msColor = ms < 0 ? K.down : ms >= 160 ? K.warn : "[#52b788]";
       const lossColor = loss >= 20 ? K.down : loss > 0 ? K.warn : "[#52b788]";
+      const lossStr = loss === 0 ? "0%" : `${loss.toFixed(1).replace(/\.0$/, "")}%`;
       return h(
         "Row",
         {
           key: p.id,
-          tw: "items-center gap-1 py-1 px-1.5 rounded-md bg-[#88888812] border border-border min-w-0",
+          tw: "items-center gap-1 py-1 px-2 rounded-md bg-surfaceHover min-w-0",
         },
         h("Box", { tw: `w-1.5 h-1.5 rounded-full shrink-0 bg-${msColor}` }),
         TX(p.name, { tw: "text-[10px] text-textMuted truncate min-w-0 shrink grow" }),
         TX(ms >= 0 ? `${Math.round(ms)}ms` : "—", {
           tw: `text-[10px] font-bold text-${msColor} tabular-nums shrink-0`,
         }),
-        TX(`${loss.toFixed(1)}%`, {
+        TX(lossStr, {
           tw: `text-[9.5px] font-semibold text-${lossColor} tabular-nums shrink-0`,
         })
       );
@@ -1598,7 +1600,7 @@ function ServerCard(node) {
     "Column",
     {
       key: `srv-${node.uuid}`,
-      tw: "gap-2.5 py-3 px-3.5 rounded-xl border border-border bg-surfaceHover cursor-pointer w-full min-w-0 hover:bg-surfacePressed",
+      tw: `gap-2.5 py-3 px-3.5 rounded-xl border border-border ${cardBg()} shadow-sm cursor-pointer w-full min-w-0 hover:bg-surfaceHover`,
       label: `Server ${node.name}`,
       onClick: () => selectNode(node.uuid),
     },
@@ -2094,7 +2096,7 @@ function CollapsibleNodeInfoCard(node, loadRecords) {
 
   return h(
     "Column",
-    { tw: "gap-1.5 py-3 px-3.5 rounded-xl border border-border bg-surfaceHover w-full min-w-0" },
+    { tw: `gap-1.5 py-3 px-3.5 rounded-xl border border-border ${cardBg()} shadow-sm w-full min-w-0` },
     h(
       "Row",
       { tw: "items-center gap-2 w-full min-w-0" },
@@ -2150,7 +2152,7 @@ function MetricChartCard({ keyId, iconName, iconColor, tintHex, title, mainValue
     {
       key: keyId,
       tw: "gap-2 py-3 px-3.5 rounded-xl border border-border w-full min-w-0",
-      linearGradient: { from: `${tintHex}16`, to: "surfaceHover", angle: 165 },
+      linearGradient: { from: `${tintHex}14`, to: isDarkTheme() ? "surface" : "background", angle: 165 },
     },
     h(
       "Row",

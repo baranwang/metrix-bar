@@ -29,5 +29,5 @@ metrixbar://registry/add?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbaranwang
 Import `komari.bar` directly:
 
 ```text
-metrixbar://install?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbaranwang%2Fmetrix-bar%2Fmain%2Fkomari%2Fkomari.bar&sha256=f41ea313d02c5d686f4a391f17d56c1dc08f281cc4302c4cddbf6a5fce3b2fd7
+metrixbar://install?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbaranwang%2Fmetrix-bar%2Fmain%2Fkomari%2Fkomari.bar&sha256=b2f3ef640a1c35b6a322178423c8f03c19d4f1bb98e07fb5dfb3c3457b9fcf18
 ```

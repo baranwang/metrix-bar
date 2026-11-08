@@ -31,5 +31,5 @@ Multi-server monitoring dashboard (`.bar` v0) for [Komari](https://komari-docume
 ## SHA-256
 
 ```text
-f41ea313d02c5d686f4a391f17d56c1dc08f281cc4302c4cddbf6a5fce3b2fd7
+b2f3ef640a1c35b6a322178423c8f03c19d4f1bb98e07fb5dfb3c3457b9fcf18
 ```
