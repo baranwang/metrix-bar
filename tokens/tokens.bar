@@ -1,6 +1,6 @@
 <bar protocol-version="0"
      category="ai"
-     version="1.0.0"
+     version="1.1.0"
      icon="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDY0IDY0IiBmaWxsPSJub25lIj48ZyBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiPjxwYXRoIGQ9Ik0xNCAxNWgzNiIvPjxwYXRoIGQ9Ik0zMiAxNXYzNCIvPjxwYXRoIGQ9Ik0yMiAyN2gyMCIgb3BhY2l0eT0iMC43NSIvPjxwYXRoIGQ9Ik0yNC41IDM3aDE1IiBvcGFjaXR5PSIwLjUiLz48cGF0aCBkPSJNMjcgNDdoMTAiIG9wYWNpdHk9IjAuMyIvPjwvZz48L3N2Zz4="
      description="Monitor AI coding token usage, daily spend, model breakdown, and multi-device submissions on Tokens (tokens.ci)."
      license="AGPL-3.0-only"
@@ -53,7 +53,7 @@
 
   <docs><![CDATA[Reads your Tokens account automatically from ~/.config/tokens/credentials.json after running `tokens login`. You can also enter any GitHub username in Inputs to view a public profile without signing in, or paste a Read Token (tkr_…) into Read or API Token to view a private profile.]]></docs>
 
-  <script apis="app localStorage match-media shell"><![CDATA[
+  <script apis="app clipboard dialog localStorage match-media screenshot shell"><![CDATA[
 // Tokens (tokens.ci) AI coding usage dashboard for Metrix.Bar.
 
 const h = (type, props, ...children) => ({
@@ -103,6 +103,11 @@ const ICON = {
   chart: svg(`<line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/>`),
   lock: svg(`<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>`),
   trophy: svg(`<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>`),
+  receipt: svg(`<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/>`),
+  palette: svg(`<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>`),
+  copy: svg(`<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>`),
+  download: svg(`<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>`),
+  chevLeft: svg(`<path d="m15 18-6-6 6-6"/>`),
   chevRight: svg(`<path d="m9 18 6-6-6-6"/>`),
   chevDown: svg(`<path d="m6 9 6 6 6-6"/>`),
   chevUp: svg(`<path d="m18 15-6-6-6 6"/>`),
@@ -423,27 +428,32 @@ function clientLogoURL(id) {
   return `${baseURL}${rel}`;
 }
 
-function ClientIcon(id, size = 14) {
+function ClientIcon(id, size = 14, mono = false) {
   const url = clientLogoURL(id);
   if (url) {
     return h("Image", {
       src: url,
       width: size,
       height: size,
+      ...(mono ? { grayscale: true } : {}),
       tw: `w-[${size}px] h-[${size}px] rounded-[3.5px] object-contain shrink-0`,
     });
   }
   return h("Box", {
-    tw: `w-2.5 h-2.5 rounded-full shrink-0 bg-[${clientColor(id)}]`,
+    tw: `w-2.5 h-2.5 rounded-full shrink-0 bg-[${mono ? "#1f1d20" : clientColor(id)}]`,
   });
 }
 
-function ModelIcon(modelId, size = 13) {
+function ModelIcon(modelId, size = 13, mono = false) {
   const rule = matchModelIconRule(modelId);
   const paths = rule ? MODEL_BRAND_PATHS[rule.icon] : null;
   if (paths) {
     const rawSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">${paths}</svg>`;
-    const c = rule.color && rule.color !== "text" ? `[${rule.color}]` : "text";
+    const c = mono
+      ? "[#1f1d20]"
+      : rule.color && rule.color !== "text"
+      ? `[${rule.color}]`
+      : "text";
     return h("Icon", {
       svg: rawSvg,
       tw: `text-[${size}px] size-[${size}px] text-${c} shrink-0`,
@@ -452,13 +462,13 @@ function ModelIcon(modelId, size = 13) {
   const clean = String(modelId || "").replace(/^.*\//, "");
   const initial = (clean[0] || "M").toUpperCase();
   const palette = ["#ec4899", "#8b5cf6", "#0ea5e9", "#f59e0b", "#10b981"];
-  const color = palette[clean.charCodeAt(0) % palette.length] || "#ec4899";
+  const color = mono ? "#1f1d20" : palette[clean.charCodeAt(0) % palette.length] || "#ec4899";
   return h(
     "Row",
     {
       tw: `w-[${size}px] h-[${size}px] rounded-[4px] bg-[${color}] items-center justify-center shrink-0`,
     },
-    TX(initial, { tw: "text-[9px] font-bold text-[#ffffff] leading-none" })
+    TX(initial, { tw: `text-[9px] font-bold text-[${mono ? "#f7f4ed" : "#ffffff"}] leading-none` })
   );
 }
 
@@ -611,6 +621,61 @@ function localDateKey(d = new Date()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+function shiftDateKey(dateKey, deltaDays) {
+  const [y, m, d] = String(dateKey || "").split("-").map(Number);
+  if (!y || !m || !d) return localDateKey();
+  return new Date(Date.UTC(y, m - 1, d + deltaDays)).toISOString().slice(0, 10);
+}
+
+function triggerReceiptCapture(mode) {
+  if (receiptBusy || !receiptDateKey) return;
+  receiptBusy = true;
+  receiptCleanShot = true;
+  setTimeout(async () => {
+    let blob = null;
+    let errMsg = "";
+    try {
+      blob = await $metrix.panel.screenshot({
+        width: W,
+        height: Math.min(2048, Math.max(520, Math.ceil(receiptShotHeight))),
+        scale: 2,
+      });
+    } catch (e) {
+      errMsg = String((e && e.message) || e);
+    } finally {
+      receiptCleanShot = false;
+      receiptBusy = false;
+      $metrix.invalidate();
+    }
+    if (!blob) {
+      if (errMsg) $metrix.toast(`Capture failed: ${errMsg}`);
+      return;
+    }
+    try {
+      if (mode === "copy") {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        receiptCopied = true;
+        $metrix.toast("Copied receipt image to clipboard");
+        $metrix.invalidate();
+        setTimeout(() => {
+          receiptCopied = false;
+          $metrix.invalidate();
+        }, 1800);
+      } else {
+        const dest = await $metrix.showSaveDialog({
+          defaultPath: `tokens-statement-${receiptDateKey}.png`,
+        });
+        if (dest) {
+          await $metrix.writeFile(dest, await blob.arrayBuffer());
+          $metrix.toast(`Saved to ${dest}`);
+        }
+      }
+    } catch (e) {
+      $metrix.toast(`Share failed: ${String((e && e.message) || e)}`);
+    }
+  }, 60);
+}
+
 function rankBadgeColor(rank) {
   if (rank === 1) return "[#E3B341]";
   if (rank === 2) return "[#A8B3C5]";
@@ -642,7 +707,21 @@ let modelSort = localStorage.getItem("tokens.modelSort") === "cost" ? "cost" : "
 let showAllModels = false;
 let selectedDate = null; // YYYY-MM-DD in heatmap
 let selectedDeviceId = null;
+let receiptDateKey = null; // YYYY-MM-DD when Receipt view is open
+let receiptTheme = localStorage.getItem("tokens.receiptTheme") || "sage";
+let receiptCleanShot = false;
+let receiptShotHeight = 680;
+let receiptCopied = false;
+let receiptBusy = false;
 const collapsedClients = new Set();
+
+const RECEIPT_THEMES = {
+  sage: { label: "Sage", dot: "#6b8e80", from: "#567568", to: "#84a597", angle: 145 },
+  terracotta: { label: "Terracotta", dot: "#a46851", from: "#8a543f", to: "#b87c64", angle: 145 },
+  nordic: { label: "Nordic", dot: "#556882", from: "#415268", to: "#6c809a", angle: 145 },
+  charcoal: { label: "Charcoal", dot: "#2a2c30", from: "#1d1e21", to: "#32353b", angle: 145 },
+};
+if (!RECEIPT_THEMES[receiptTheme]) receiptTheme = "sage";
 
 // Cached API payloads
 const profileCache = new Map(); // period -> normalized profile object
@@ -1435,6 +1514,116 @@ function Header() {
       ? prof.user.avatarUrl
       : "";
 
+  if (receiptDateKey) {
+    if (receiptCleanShot) return null;
+    const todayKey = localDateKey();
+    const canNext = receiptDateKey < todayKey;
+    const themeKeys = Object.keys(RECEIPT_THEMES);
+    const curTheme = RECEIPT_THEMES[receiptTheme] || RECEIPT_THEMES.sage;
+    const cycleTheme = () => {
+      const idx = themeKeys.indexOf(receiptTheme);
+      receiptTheme = themeKeys[(idx + 1) % themeKeys.length];
+      localStorage.setItem("tokens.receiptTheme", receiptTheme);
+      $metrix.invalidate();
+    };
+    return h(
+      "Column",
+      { tw: "w-full shrink-0" },
+      h(
+        "Row",
+        { tw: "gap-1.5 pt-3 pr-3 pb-2.5 pl-3.5 items-center w-full min-w-0" },
+        IconButton(
+          "back",
+          t.backToMain,
+          () => {
+            receiptDateKey = null;
+            $metrix.invalidate();
+          },
+          false,
+          "btn-rcpt-back"
+        ),
+        Icon("receipt", 15, `[${curTheme.dot}]`),
+        TX("Statement", { tw: "text-sm font-bold shrink-0" }),
+        h("Spacer"),
+        // Clean borderless date switcher
+        h(
+          "Row",
+          { tw: "items-center gap-0.5 shrink-0" },
+          h(
+            "Column",
+            {
+              tw: "w-6 h-6 items-center justify-center rounded-[6px] cursor-pointer hover:bg-surfaceHover pressed:bg-surfacePressed",
+              tooltip: "Previous day",
+              onClick: () => {
+                receiptDateKey = shiftDateKey(receiptDateKey, -1);
+                $metrix.invalidate();
+              },
+            },
+            Icon("chevLeft", 13, K.muted)
+          ),
+          TX(formatPrettyDate(receiptDateKey), {
+            tw: "text-xs font-medium text-textMuted px-0.5 tabular-nums",
+          }),
+          h(
+            "Column",
+            {
+              tw: `w-6 h-6 items-center justify-center rounded-[6px] ${
+                canNext ? "cursor-pointer hover:bg-surfaceHover pressed:bg-surfacePressed" : "opacity-30"
+              }`,
+              tooltip: "Next day",
+              onClick: () => {
+                if (canNext) {
+                  receiptDateKey = shiftDateKey(receiptDateKey, 1);
+                  $metrix.invalidate();
+                }
+              },
+            },
+            Icon("chevRight", 13, K.muted)
+          )
+        ),
+        // 3 Unified 28x28 Icon Buttons: Backdrop Theme, Copy, Save
+        h(
+          "Column",
+          {
+            key: "btn-rcpt-theme",
+            tw: "w-7 h-7 items-center justify-center rounded-[7px] shrink-0 cursor-pointer hover:bg-surfaceHover pressed:bg-surfacePressed",
+            tooltip: `Backdrop: ${curTheme.label} (click to switch)`,
+            onClick: cycleTheme,
+            popoverMenu: themeKeys.map(k => ({
+              label: RECEIPT_THEMES[k].label,
+              checked: receiptTheme === k,
+              radio: true,
+              onClick: () => {
+                receiptTheme = k;
+                localStorage.setItem("tokens.receiptTheme", k);
+                $metrix.invalidate();
+              },
+            })),
+          },
+          Icon("palette", 15, `[${curTheme.dot}]`)
+        ),
+        h(
+          "Column",
+          {
+            key: "btn-rcpt-copy",
+            tw: "w-7 h-7 items-center justify-center rounded-[7px] shrink-0 cursor-pointer hover:bg-surfaceHover pressed:bg-surfacePressed",
+            tooltip: receiptCopied ? "Copied!" : "Copy image to clipboard",
+            onClick: () => triggerReceiptCapture("copy"),
+          },
+          Icon(receiptCopied ? "check" : "copy", 15, receiptCopied ? "[#10b981]" : K.muted)
+        ),
+        IconButton(
+          "download",
+          "Save PNG image",
+          () => triggerReceiptCapture("save"),
+          false,
+          "btn-rcpt-save"
+        )
+      ),
+      Line()
+    );
+  }
+
   if (selectedDeviceId) {
     const dev = devicesList.find(d => d.id === selectedDeviceId);
     const title = (dev && dev.displayName) || t.deviceDetailTitle;
@@ -1520,6 +1709,18 @@ function Header() {
           })
         : null,
       h("Spacer"),
+      resolvedUsername
+        ? IconButton(
+            "receipt",
+            "Daily AI Statement",
+            () => {
+              receiptDateKey = selectedDate || localDateKey();
+              $metrix.invalidate();
+            },
+            false,
+            "btn-receipt"
+          )
+        : null,
       resolvedUsername ? IconButton("refresh", t.refresh, launchRefresh, loading, "btn-refresh") : null,
       IconButton("external", t.openProfile, () => $metrix.openURL(profileURL()), false, "btn-open")
     ),
@@ -2046,14 +2247,28 @@ function HeatmapCard(prof) {
           Line(),
           h(
             "Row",
-            { tw: "items-center justify-between w-full min-w-0" },
+            { tw: "items-center gap-2 w-full min-w-0" },
             TX(formatPrettyDate(selectedDate), { tw: "text-xs font-bold" }),
+            h("Spacer"),
             TX(
               `${formatTokens(inspectedDay.totals && inspectedDay.totals.tokens, 1)} · ${formatCost(
                 inspectedDay.totals && inspectedDay.totals.cost,
                 false
               )}`,
               { tw: "text-xs font-bold text-[#10b981] tabular-nums" }
+            ),
+            h(
+              "Row",
+              {
+                tw: "items-center gap-1 py-0.5 px-2 rounded-md bg-surfaceHover cursor-pointer shrink-0 hover:bg-surfacePressed",
+                tooltip: "Open Daily AI Statement Receipt",
+                onClick: () => {
+                  receiptDateKey = selectedDate;
+                  $metrix.invalidate();
+                },
+              },
+              Icon("receipt", 11, K.muted),
+              TX("Receipt", { tw: "text-[10.5px] font-medium text-textMuted" })
             )
           ),
           renderDayTokenCategories(inspectedDay, `hm-${selectedDate}`),
@@ -2294,6 +2509,293 @@ function DevicesListCard() {
             );
           })
         )
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Secondary View: Daily AI Statement Receipt (inspired by magpie day-card)
+// ---------------------------------------------------------------------------
+
+function ReceiptDashedRule() {
+  const cmds = [];
+  for (let x = 4; x < 312; x += 9) {
+    cmds.push({ op: "rect", rect: { x, y: 3, width: 5, height: 1 }, color: "#a8a49c" });
+  }
+  return h("Canvas", { width: 316, height: 7, commands: cmds, tw: "w-full h-[7px]" });
+}
+
+function ReceiptTornEdge() {
+  const W_PAPER = 364;
+  const H_TEETH = 6;
+  const H_CANVAS = 14;
+  const teeth = 36;
+  const tw = W_PAPER / teeth;
+  const makeTeethPath = dy => {
+    const p = [["M", 0, 0], ["L", W_PAPER, 0]];
+    for (let i = teeth - 1; i >= 0; i--) {
+      p.push(["L", Number((i * tw + tw / 2).toFixed(2)), H_TEETH + dy]);
+      p.push(["L", Number((i * tw).toFixed(2)), dy]);
+    }
+    p.push(["Z"]);
+    return p;
+  };
+  return h("Canvas", {
+    width: W_PAPER,
+    height: H_CANVAS,
+    commands: [
+      { op: "path", path: makeTeethPath(4), color: "#00000010" },
+      { op: "path", path: makeTeethPath(2), color: "#0000001a" },
+      { op: "path", path: makeTeethPath(0), color: "#f7f4ed" },
+    ],
+    tw: "w-full h-[14px]",
+  });
+}
+
+function ReceiptView(prof) {
+  const baseProf = allTimeProfile() || prof;
+  const contribs = (baseProf && baseProf.contributions) || [];
+  const byDate = new Map();
+  for (const c of contribs) {
+    if (c && c.date) byDate.set(c.date, c);
+  }
+
+  const dKey = receiptDateKey || localDateKey();
+  const todayKey = localDateKey();
+  const day = byDate.get(dKey) || null;
+  const tok = num(day && day.totals && day.totals.tokens, 0);
+  const cost = num(day && day.totals && day.totals.cost, 0);
+  const clients = extractDayClients(day);
+  const msgs = dayMessageCount(day, clients);
+
+  // Streak ending at dKey
+  const activeSet = new Set(
+    contribs.filter(c => c && c.date && num(c.totals && c.totals.tokens, 0) > 0).map(c => c.date)
+  );
+  let cursor = dKey;
+  if (!activeSet.has(cursor) && cursor === todayKey) {
+    cursor = shiftDateKey(cursor, -1);
+  }
+  let streakDays = 0;
+  while (activeSet.has(cursor)) {
+    streakDays++;
+    cursor = shiftDateKey(cursor, -1);
+  }
+
+  // Average active day before dKey
+  const priorDays = contribs.filter(
+    c => c && c.date && c.date < dKey && num(c.totals && c.totals.tokens, 0) > 0
+  );
+  let vsAvgStr = "–";
+  if (priorDays.length > 0) {
+    const sumCost = priorDays.reduce((acc, c) => acc + num(c.totals && c.totals.cost, 0), 0);
+    const sumTok = priorDays.reduce((acc, c) => acc + num(c.totals && c.totals.tokens, 0), 0);
+    const avgCost = sumCost / priorDays.length;
+    const avgTok = sumTok / priorDays.length;
+    let ratio = 0;
+    if (avgCost > 0 && cost > 0) ratio = cost / avgCost;
+    else if (avgTok > 0 && tok > 0) ratio = tok / avgTok;
+    if (ratio > 0) {
+      vsAvgStr = ratio < 0.1 ? "<0.1×" : `${ratio >= 100 ? Math.round(ratio) : ratio.toFixed(1)}×`;
+    }
+  }
+
+  // Cache hit rate: cacheRead / (input + cacheRead + cacheWrite)
+  const tb = (day && day.tokenBreakdown) || {};
+  const inTok = Math.max(0, num(tb.input, 0));
+  const outTok = Math.max(0, num(tb.output, 0));
+  const cRead = Math.max(0, num(tb.cacheRead, 0));
+  const cWrite = Math.max(0, num(tb.cacheWrite, 0));
+  const promptTotal = inTok + cRead + cWrite;
+  const hitRateStr =
+    promptTotal > 0 ? `${Math.min(100, (cRead / promptTotal) * 100).toFixed(1)}%` : "–";
+
+  const now = new Date();
+  const pad2 = n => String(n).padStart(2, "0");
+  const issuedStr = `${formatPrettyDate(localDateKey(now)).toUpperCase()} AT ${pad2(
+    now.getHours()
+  )}:${pad2(now.getMinutes())}`;
+  const dateUpper = formatPrettyDate(dKey).toUpperCase();
+  const rank =
+    (baseProf && baseProf.user && baseProf.user.rank) ||
+    (prof && prof.user && prof.user.rank) ||
+    null;
+  const uname = resolvedUsername || (prof && prof.user && prof.user.username) || "tokens";
+  const th = RECEIPT_THEMES[receiptTheme] || RECEIPT_THEMES.sage;
+
+  const shownClients = clients.slice(0, 6);
+  const modelRowsCount = shownClients.reduce((acc, cl) => acc + Math.min(5, cl.models.length), 0);
+  const moreRowsCount = shownClients.filter(cl => cl.models.length > 5).length;
+  receiptShotHeight =
+    475 + shownClients.length * 26 + modelRowsCount * 21 + moreRowsCount * 18;
+
+  const INK = "[#1f1d20]";
+  const MUTED = "[#76736e]";
+
+  const kvRow = (label, value, bold = false) =>
+    h(
+      "Row",
+      { tw: "items-center justify-between gap-2 w-full min-w-0" },
+      TX(label, { tw: `text-[11px] font-mono text-${MUTED} shrink-0` }),
+      TX(value, {
+        tw: `text-[11px] font-mono ${bold ? "font-bold" : "font-medium"} text-${INK} tabular-nums truncate`,
+      })
+    );
+
+  return h(
+    receiptCleanShot ? "Column" : "Scroll",
+    {
+      tw: "grow min-h-0 w-full",
+      ...(receiptCleanShot ? {} : { scrollbars: true }),
+      linearGradient: { from: th.from, to: th.to, angle: th.angle, oklab: true },
+    },
+    h(
+      "Column",
+      {
+        tw: "items-center justify-center py-6 px-7 w-full grow",
+      },
+      // Paper container + Torn Bottom Edge
+      h(
+        "Column",
+        { tw: "w-full" },
+        // Main Paper Slip
+        h(
+          "Column",
+          {
+            radius: [4, 4, 0, 0],
+            tw: "gap-2.5 pt-5 pr-5 pb-4 pl-5 bg-[#f7f4ed] w-full min-w-0",
+          },
+          // 1. Receipt Title & Tagline
+          h(
+            "Column",
+            { tw: "items-center gap-0.5 pb-1 w-full" },
+            TX("DAILY AI STATEMENT", {
+              tw: `text-lg font-mono font-extrabold text-${INK} tracking-[1.2px] text-center`,
+            }),
+            TX(`Tracked via tokens.ci · @${uname}`, {
+              tw: `text-[10.5px] font-mono text-${MUTED} text-center`,
+            })
+          ),
+          // 2. Date & Issued At
+          h(
+            "Column",
+            { tw: "gap-1 w-full" },
+            kvRow("DATE", dateUpper),
+            kvRow("ISSUED", issuedStr)
+          ),
+          ReceiptDashedRule(),
+          // 3. Total API Cost
+          h(
+            "Column",
+            { tw: "items-center gap-1 py-1 w-full" },
+            TX("TOTAL API COST", {
+              tw: `text-[10.5px] font-mono text-${MUTED} tracking-[2px]`,
+            }),
+            TX(formatCost(cost, false), {
+              tw: `text-3xl font-mono font-extrabold text-${INK} tabular-nums leading-none py-0.5`,
+            }),
+            TX("API-EQUIVALENT COST · NOT AN INVOICE", {
+              tw: `text-[9px] font-mono text-${MUTED} tracking-[0.8px]`,
+            })
+          ),
+          ReceiptDashedRule(),
+          // 4. Streak, Messages, vs Average Day
+          h(
+            "Column",
+            { tw: "gap-1 w-full" },
+            kvRow("STREAK", `${streakDays} ${streakDays === 1 ? "DAY" : "DAYS"}`, true),
+            kvRow("MESSAGES", comma(msgs), true),
+            kvRow("VS AVERAGE DAY", vsAvgStr, true)
+          ),
+          ReceiptDashedRule(),
+          // 5. Client / Model Breakdown
+          h(
+            "Column",
+            { tw: "gap-1.5 w-full min-w-0" },
+            h(
+              "Row",
+              { tw: "items-center justify-between w-full" },
+              TX("CLIENT / MODEL", { tw: `text-[10px] font-mono text-${MUTED}` }),
+              TX("COST", { tw: `text-[10px] font-mono text-${MUTED}` })
+            ),
+            clients.length === 0
+              ? TX("No activity recorded on this day.", {
+                  tw: `text-[11px] font-mono text-${MUTED} py-2`,
+                })
+              : h(
+                  "Column",
+                  { tw: "gap-2 w-full min-w-0" },
+                  ...clients.slice(0, 6).map(cl =>
+                    h(
+                      "Column",
+                      { key: `rcpt-cl-${cl.client}`, tw: "gap-1 w-full min-w-0" },
+                      h(
+                        "Row",
+                        { tw: "items-center gap-1.5 w-full min-w-0" },
+                        ClientIcon(cl.client, 13, true),
+                        TX(clientName(cl.client).toUpperCase(), {
+                          tw: `text-xs font-mono font-bold text-${INK} truncate min-w-0 shrink grow`,
+                        }),
+                        TX(formatCost(cl.cost, false), {
+                          tw: `text-xs font-mono font-bold text-${INK} tabular-nums shrink-0`,
+                        })
+                      ),
+                      ...cl.models.slice(0, 5).map((m, idx) =>
+                        h(
+                          "Row",
+                          {
+                            key: `rcpt-m-${cl.client}-${m.modelId || m.model || idx}`,
+                            tw: "items-center gap-1.5 pl-4 w-full min-w-0",
+                          },
+                          ModelIcon(m.modelId || m.model, 11, true),
+                          TX(String(m.modelId || m.model || "").toUpperCase(), {
+                            tw: `text-[10.5px] font-mono text-${INK} truncate min-w-0 shrink grow`,
+                          }),
+                          TX(formatCost(m.cost, false), {
+                            tw: `text-[10.5px] font-mono text-${MUTED} tabular-nums shrink-0`,
+                          })
+                        )
+                      ),
+                      cl.models.length > 5
+                        ? TX(`+${cl.models.length - 5} MORE`, {
+                            tw: `text-[10px] font-mono text-${MUTED} pl-4`,
+                          })
+                        : null
+                    )
+                  )
+                )
+          ),
+          ReceiptDashedRule(),
+          // 6. Token Totals & Cache Hit Rate
+          h(
+            "Column",
+            { tw: "gap-1 w-full" },
+            kvRow("TOTAL TOKENS", formatTokens(tok, 1), true),
+            kvRow("INPUT", formatTokens(inTok, 1)),
+            kvRow("OUTPUT", formatTokens(outTok, 1)),
+            kvRow("CACHE HIT RATE", hitRateStr, true)
+          ),
+          ReceiptDashedRule(),
+          // 7. Footer
+          h(
+            "Column",
+            { tw: "items-center gap-0.5 pt-1 w-full" },
+            TX(
+              `@${uname}${rank ? " · GLOBAL #" + comma(rank) : ""}${
+                todayRank && dKey === todayKey ? " · TODAY #" + comma(todayRank) : ""
+              }`,
+              {
+                tw: `text-[10px] font-mono font-bold text-${INK} text-center`,
+              }
+            ),
+            TX("tokens.ci · metrix.bar", {
+              tw: `text-[9.5px] font-mono text-${MUTED} text-center`,
+            })
+          )
+        ),
+        // Torn Teeth Bottom Edge
+        ReceiptTornEdge()
+      )
+    )
   );
 }
 
@@ -2561,6 +3063,9 @@ function Body() {
   if (prof.banned) {
     return Problem("Tokens", t.bannedNotice(prof.banReason), false);
   }
+  if (receiptDateKey) {
+    return ReceiptView(prof);
+  }
 
   return h(
     "Scroll",
@@ -2597,7 +3102,10 @@ function panelTree() {
         "CmdOrCtrl+2": () => switchPeriod("month"),
         "CmdOrCtrl+3": () => switchPeriod("week"),
         Escape: () => {
-          if (selectedDeviceId) {
+          if (receiptDateKey) {
+            receiptDateKey = null;
+            $metrix.invalidate();
+          } else if (selectedDeviceId) {
             selectedDeviceId = null;
             $metrix.invalidate();
           } else if (selectedDate) {

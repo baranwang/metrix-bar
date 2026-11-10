@@ -1,11 +1,15 @@
 # Tokens Dashboard for Metrix.Bar
 
-AI coding token usage and spend dashboard (`.bar` v0) for [Tokens (`tokens.ci`)](https://tokens.ci/).
+AI coding token usage, spend, and shareable daily statement receipt dashboard (`.bar` v0, `v1.1.0`) for [Tokens (`tokens.ci`)](https://tokens.ci/).
 
 ## Features
 
 - **Zero-Config CLI Detection**: Automatically reads `~/.config/tokens/credentials.json` (created by `tokens login`) to detect your GitHub username and personal API token (`tt_…`). Also supports viewing any public profile by username or unlocking private profiles with a Read Token (`tkr_…`).
 - **Menu Bar / System Tray**: Monochrome template Tokens mark with configurable tray display (`Today Tokens · Today Cost` by default, `Today Tokens · Rank`, `Total Tokens · Rank`, `Total Tokens · Total Cost`, `Today Tokens Only`, or `Today Cost Only`).
+- **Daily AI Statement Receipt (`🧾 Statement`)**:
+  - Shareable thermal-paper receipt view (`DAILY AI STATEMENT`) with torn-tooth bottom edge and monochrome ink client/model logos.
+  - Shows daily API-equivalent spend, active streak (`STREAK`), message count, comparison against prior average active day (`VS AVERAGE DAY`), per-client/model cost breakdown, and `CACHE HIT RATE`.
+  - 4 curated editorial OKLab backdrops (`Sage`, `Terracotta`, `Nordic`, `Charcoal`), date stepper (`‹ Date ›`), one-click headerless 2× PNG copy to clipboard, and PNG file export.
 - **Today Hero Overview**:
   - Live daily token total, today's leaderboard rank badge (`#N today`), daily spend, and message count.
   - 5-category `TOKEN BREAKDOWN` bar and list (`Input`, `Output`, `Cache Read`, `Cache Write`, `Reasoning`).
@@ -30,5 +34,5 @@ AI coding token usage and spend dashboard (`.bar` v0) for [Tokens (`tokens.ci`)]
 ## SHA-256
 
 ```text
-bcc9c9b05b7c3e762fd5684554b6a0db7e7edd9bbe706f78a725fd4ca22da4d9
+77e9d275bfc752159c3ab4094b852b347cab81dfd8487a2765312ac01bc85f9e
 ```

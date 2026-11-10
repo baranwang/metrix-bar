@@ -36,5 +36,5 @@ metrixbar://install?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbaranwang%2Fme
 Import `tokens.bar` directly:
 
 ```text
-metrixbar://install?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbaranwang%2Fmetrix-bar%2Fmain%2Ftokens%2Ftokens.bar&sha256=bcc9c9b05b7c3e762fd5684554b6a0db7e7edd9bbe706f78a725fd4ca22da4d9
+metrixbar://install?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbaranwang%2Fmetrix-bar%2Fmain%2Ftokens%2Ftokens.bar&sha256=77e9d275bfc752159c3ab4094b852b347cab81dfd8487a2765312ac01bc85f9e
 ```
