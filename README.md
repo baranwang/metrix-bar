@@ -7,7 +7,7 @@ Custom [Metrix.Bar](https://metrix.bar/) native menu bar and system tray dashboa
 | Dashboard | Directory | Description |
 | :--- | :--- | :--- |
 | **[Komari](./komari)** | `komari/komari.bar` | Multi-server status, real-time bandwidth, traffic quota, and historical load & ping trends for [Komari](https://komari-document.pages.dev/). |
-| **[Tokens](./tokens)** | `tokens/tokens.bar` | AI coding token usage, daily spend, 53-week activity heatmap, model breakdown, and multi-device submissions for [Tokens](https://tokens.ci/). |
+| **[Tokens](./tokens)** | `tokens/tokens.bar` | AI coding token usage, daily spend, desktop widgets in three sizes, shareable daily statements, and multi-device submissions for [Tokens](https://tokens.ci/). |
 
 ## Installation
 
@@ -36,5 +36,5 @@ metrixbar://install?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbaranwang%2Fme
 Import `tokens.bar` directly:
 
 ```text
-metrixbar://install?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbaranwang%2Fmetrix-bar%2Fmain%2Ftokens%2Ftokens.bar&sha256=77e9d275bfc752159c3ab4094b852b347cab81dfd8487a2765312ac01bc85f9e
+metrixbar://install?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbaranwang%2Fmetrix-bar%2Fmain%2Ftokens%2Ftokens.bar&sha256=db155f221e98ec1f47df8a41847a2b4f422d34455f6330378812178d0e3cb718
 ```
