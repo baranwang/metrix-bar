@@ -8,6 +8,7 @@ Custom [Metrix.Bar](https://metrix.bar/) native menu bar and system tray dashboa
 | :--- | :--- | :--- |
 | **[Komari](./komari)** | `komari/komari.bar` | Multi-server status, real-time bandwidth, traffic quota, and historical load & ping trends for [Komari](https://komari-document.pages.dev/). |
 | **[Tokens](./tokens)** | `tokens/tokens.bar` | AI coding token usage, daily spend, private account connection, desktop widgets in three sizes, shareable daily statements, and multi-device submissions for [Tokens](https://tokens.ci/). |
+| **[黄历 (Tungshing)](./tungshing)** | `tungshing/tungshing.bar` | Chinese lunar calendar, daily and hourly almanac, festivals, solar terms, and a moon-phase menu bar icon. |
 
 ## Installation
 
@@ -37,4 +38,10 @@ Import `tokens.bar` directly:
 
 ```text
 metrixbar://install?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbaranwang%2Fmetrix-bar%2Fmain%2Ftokens%2Ftokens.bar&sha256=253bac972d1698ce096fb477f42be6b92dbd50cfe8da66969ccea2ee0e433942
+```
+
+Import `tungshing.bar` directly:
+
+```text
+metrixbar://install?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbaranwang%2Fmetrix-bar%2Fmain%2Ftungshing%2Ftungshing.bar&sha256=d143b12970c3df03b1e71f123cf64f7cc0c06879464aa0cd22d14c71840d5fd9
 ```

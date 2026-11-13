@@ -32,6 +32,19 @@
       "homepage": "https://github.com/baranwang/metrix-bar/tree/main/tokens",
       "docs": "Reads your Tokens account automatically from ~/.config/tokens/credentials.json after running `tokens login`. If a private account only shows totals, click Connect Private Account to create and securely save a read token using your CLI login. Connecting enables Private Mode; it never makes the account public. Your CLI credentials and existing API token are preserved. You can also enter any GitHub username in Inputs to view a public profile without signing in, or paste a Read Token (tkr_…) into Private Read Token. Add a small, medium, or large Metrix.Bar widget through your system's widget picker and select Tokens.",
       "sha256": "253bac972d1698ce096fb477f42be6b92dbd50cfe8da66969ccea2ee0e433942"
+    },
+    {
+      "id": "tungshing",
+      "name": "黄历",
+      "file": "tungshing/tungshing.bar",
+      "protocol_version": "0",
+      "version": "1.0.0",
+      "category": "lifestyle",
+      "description": "每日农历、宜忌与时辰吉凶。",
+      "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI4IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xMiA0QTggOCAwIDAgMSAxMiAyMEE0IDggMCAwIDAgMTIgNFoiLz48L3N2Zz4=",
+      "homepage": "https://github.com/baranwang/tungshing",
+      "docs": "黄历在本机计算，首次使用需联网加载一次。「今天」和当前时辰按这台 Mac 的时区判断。",
+      "sha256": "d143b12970c3df03b1e71f123cf64f7cc0c06879464aa0cd22d14c71840d5fd9"
     }
   ]
 }

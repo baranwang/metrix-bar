@@ -1,0 +1,402 @@
+<bar protocol-version="0"
+     id="tungshing"
+     title="黄历"
+     version="1.0.0"
+     category="lifestyle"
+     icon="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI4IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xMiA0QTggOCAwIDAgMSAxMiAyMEE0IDggMCAwIDAgMTIgNFoiLz48L3N2Zz4="
+     description="每日农历、宜忌与时辰吉凶。"
+     homepage="https://github.com/baranwang/tungshing"
+     refresh="1m"
+     material="solid">
+  <permissions>
+    <network origin="https://esm.sh" />
+  </permissions>
+  <inputs>
+    <input name="trayFormat" type="select" label="菜单栏显示" default="month-day">
+      <option value="month-day" label="农历月日（十月初五）" />
+      <option value="day" label="仅农历日（初五）" />
+    </input>
+  </inputs>
+  <docs><![CDATA[黄历在本机计算，首次使用需联网加载一次。「今天」和当前时辰按这台 Mac 的时区判断。]]></docs>
+  <script apis="intl match-media"><![CDATA[
+const h = (type, props, ...children) => ({
+  type,
+  props: props || {},
+  children: children.flat().filter(child => child != null && child !== false),
+});
+const text = (value, props) => h("Text", {
+  fontSize: 14, fontWeight: 400, lineHeight: 1.5, ...props,
+}, String(value));
+const pad = value => String(value).padStart(2, "0");
+const dateKey = date => `${String(date.getYear()).padStart(4, "0")}-${pad(date.getMonth())}-${pad(date.getDay())}`;
+const names = values => [...new Set(values.map(value => value.getName()))];
+const calendarSVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 11h18m-13 5h2m4 0h2"/></svg>';
+const calendarIcon = "data:image/svg+xml," + encodeURIComponent(calendarSVG);
+// 按农历日画 8 档月相（真实比例的细月牙在菜单栏里看不见）：圆框 + 受光部分，交界线是半椭圆
+function moonSVG(day) {
+  const phase = day === 1 || day === 30 ? 0 : day <= 6 ? 1 : day <= 9 ? 2 : day <= 13 ? 3
+    : day <= 17 ? 4 : day <= 21 ? 5 : day <= 24 ? 6 : 7;
+  const rx = [8, 4, 0, 4, 8, 4, 0, 4][phase];
+  const waxing = phase < 4, crescent = phase < 2 || phase > 6;
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">'
+    + '<circle cx="12" cy="12" r="8" fill="none" stroke="#000" stroke-width="1.5"/>'
+    + `<path fill="#000" d="M12 4A8 8 0 0 ${waxing ? 1 : 0} 12 20A${rx} 8 0 0 ${waxing === crescent ? 0 : 1} 12 4Z"/></svg>`;
+}
+const appearance = globalThis.matchMedia?.("(prefers-color-scheme: dark)");
+appearance?.addEventListener("change", () => $metrix.invalidate());
+
+let library;
+let lastEnv;
+let clock;
+let today;
+let day;
+let selectedDate = null;
+let selectedHour = null;
+let detailsOpen = false;
+let calendarOpen = false;
+let error = "";
+let dateError = "";
+
+function readClock(env) {
+  const zone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const parts = new Intl.DateTimeFormat("en", {
+    timeZone: zone,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  const hour = Number(values.hour);
+  if (!Number.isInteger(hour) || hour < 0 || hour > 23) throw new Error("无法读取当前时区的时间");
+  return {
+    zone,
+    date: `${values.year.padStart(4, "0")}-${values.month}-${values.day}`,
+    hourIndex: hour === 0 ? 0 : Math.floor((hour + 1) / 2),
+    time: `${pad(hour)}:${values.minute}`,
+  };
+}
+
+function readDate(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new Error("请选择有效日期（YYYY-MM-DD）");
+  }
+  const [year, month, date] = value.split("-").map(Number);
+  if (year < 1 || year > 9999) throw new Error("日期年份须在 1–9999 之间");
+  const solar = library.SolarDay.fromYmd(year, month, date);
+  if (dateKey(solar) !== value) throw new Error("请选择有效的公历日期");
+  return solar;
+}
+
+function hourData(hour, index) {
+  const cycle = hour.getSixtyCycle();
+  const stem = cycle.getHeavenStem();
+  const branch = cycle.getEarthBranch();
+  const start = hour.getSolarTime().getHour();
+  const end = index === 0 ? 1 : index === 12 ? 24 : start + 2;
+  const title = index === 0 ? "子正" : index === 12 ? "子初" : hour.getName();
+  const direction = value => {
+    const name = value.getName();
+    return ["东", "南", "西", "北"].includes(name) ? "正" + name : name;
+  };
+  return {
+    title,
+    range: `${pad(start)}:00–${pad(end)}:00`,
+    shortRange: `${pad(start)}–${pad(end)}`,
+    cycle: cycle.getName(),
+    luck: hour.getTwelveStar().getEcliptic().getLuck().getName(),
+    star: hour.getTwelveStar().getName(),
+    sound: cycle.getSound().getName(),
+    clash: `冲${branch.getOpposite().getZodiac().getName()} · 煞${branch.getOminous().getName()}`,
+    joy: direction(stem.getJoyDirection()),
+    wealth: direction(stem.getWealthDirection()),
+    fortune: direction(stem.getMascotDirection()),
+    recommends: names(hour.getRecommends()),
+    avoids: names(hour.getAvoids()),
+  };
+}
+
+function almanac(value) {
+  const solar = readDate(value);
+  const lunar = solar.getLunarDay();
+  const cycleDay = solar.getSixtyCycleDay();
+  const cycle = cycleDay.getSixtyCycle();
+  const branch = cycle.getEarthBranch();
+  const star = lunar.getTwentyEightStar();
+  const gods = lunar.getGods();
+  const term = solar.getTermDay();
+  return {
+    date: value,
+    solar,
+    moonDay: lunar.getDay(),
+    lunarDay: lunar.getName(),
+    lunar: lunar.getLunarMonth().getName().replace(/十一月$/, "冬月").replace(/十二月$/, "腊月") + lunar.getName(),
+    solarLabel: `${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日`,
+    week: "星期" + solar.getWeek().getName(),
+    pillars: `${cycleDay.getYear().getName()}年 · ${cycleDay.getMonth().getName()}月 · ${cycle.getName()}日`,
+    festival: lunar.getFestival()?.getName() || "",
+    term: `${term.getSolarTerm().getName()} · 第${term.getDayIndex() + 1}天`,
+    luck: lunar.getTwelveStar().getEcliptic().getLuck().getName(),
+    recommends: names(lunar.getRecommends()),
+    avoids: names(lunar.getAvoids()),
+    details: [
+      ["纳音", cycle.getSound().getName()],
+      ["冲煞", `冲${branch.getOpposite().getZodiac().getName()} · 煞${branch.getOminous().getName()}`],
+      ["值神", `${lunar.getTwelveStar().getName()} · ${lunar.getTwelveStar().getEcliptic().getName()}`],
+      ["建除", lunar.getDuty().getName()],
+      ["星宿", `${star.getName()}${star.getSevenStar().getName()}${star.getAnimal().getName()} · ${star.getLuck().getName()}`],
+      ["胎神", lunar.getFetusDay().getName()],
+      ["吉神宜趋", names(gods.filter(god => god.getLuck().getName() === "吉")).join("  ") || "无"],
+      ["凶神宜忌", names(gods.filter(god => god.getLuck().getName() !== "吉")).join("  ") || "无"],
+      ["彭祖百忌", `${cycle.getHeavenStem().getPengZuHeavenStem().getName()}\n${branch.getPengZuEarthBranch().getName()}`],
+    ],
+    hours: lunar.getHours().map(hourData),
+  };
+}
+
+function update(env) {
+  const nextClock = readClock(env);
+  const nextToday = today?.date === nextClock.date ? today : almanac(nextClock.date);
+  const date = selectedDate || nextClock.date;
+  const nextDay = date === nextToday.date ? nextToday : day?.date === date ? day : almanac(date);
+  clock = nextClock;
+  today = nextToday;
+  day = nextDay;
+  error = "";
+}
+
+async function refresh(env) {
+  lastEnv = env;
+  try {
+    if (!library) library = await import("https://esm.sh/tyme4ts@1.5.6");
+    update(env);
+  } catch (problem) {
+    error = library ? `黄历计算失败：${problem.message || problem}` : "计算库加载失败，请检查网络后重试";
+  }
+}
+
+function pickDate(value) {
+  try {
+    const next = almanac(value);
+    selectedDate = value === clock.date ? null : value;
+    selectedHour = null;
+    day = next;
+    dateError = "";
+    calendarOpen = false;
+  } catch (problem) {
+    dateError = problem.message || "无法显示该日期";
+  }
+}
+
+function moveDate(offset) {
+  try {
+    pickDate(dateKey(day.solar.next(offset)));
+  } catch {
+    dateError = "已到可浏览日期的边界";
+  }
+}
+
+function goToday() {
+  selectedDate = null;
+  selectedHour = null;
+  dateError = "";
+  calendarOpen = false;
+  if (today) day = today;
+}
+
+const serif = (value, props) => text(value, {font: "serif", ...props});
+
+function chip(value, c, accent = false) {
+  return h("Box", {padding: [2, 8], radius: 10, background: accent ? c.accentSoft : c.soft},
+    text(value, {fontSize: 12, fontWeight: 500, textColor: accent ? c.accent : c.muted}));
+}
+
+function card(c, props, ...children) {
+  return h("Column", {padding: 16, gap: 12, radius: 12, background: c.card, border: [1, c.line], fillWidth: true, ...props}, ...children);
+}
+
+function line(c) {
+  return h("Box", {height: 1, fillWidth: true, background: c.line});
+}
+
+function stamp(label, c, size) {
+  const good = label === "宜";
+  return h("Box", {width: size, height: size, radius: size / 2, shrink: 0, label,
+    background: good ? c.accent : c.ink, alignItems: "center", justify: "center"},
+    serif(label, {fontSize: size > 20 ? 14 : 12, lineHeight: 1, fontWeight: 700, textColor: c.card}));
+}
+
+function taboos(label, values, c, compact = false) {
+  return h("Row", {gap: 12, fillWidth: true, alignItems: "start"},
+    stamp(label, c, compact ? 20 : 24),
+    text(values.length ? values.join("　") : "无", {
+      fontSize: 14, lineHeight: compact ? 1.5 : 1.75, wrap: true,
+      grow: 1, shrink: 1, minWidth: 0, paddingTop: compact ? 0 : 2,
+      textColor: values.length ? c.ink : c.faint,
+    }));
+}
+
+function fact(label, value, c) {
+  return h("Column", {gap: 2, minWidth: 0},
+    text(label, {fontSize: 12, textColor: c.faint}),
+    text(value, {fontSize: 14, wrap: true}));
+}
+
+function dateHeader(c) {
+  const arrow = (label, value, offset) => h("ButtonBase", {
+    key: label, label, tooltip: label,
+    width: 28, height: 28, padding: 0, radius: 14, focusRing: true,
+    alignItems: "center", justify: "center",
+    hover: {background: c.soft}, pressed: {background: c.line}, disabled: !day,
+    onClick: () => moveDate(offset),
+  }, text(value, {fontSize: 20, lineHeight: 1, textColor: c.muted}));
+  return h("Column", {gap: 8, fillWidth: true},
+    h("Row", {gap: 4, alignItems: "center", fillWidth: true},
+      h("ButtonBase", {key: "date-heading", padding: [4, 8], radius: 8, disabled: !day, focusRing: true,
+        hover: {background: c.soft}, label: day ? `${day.solarLabel}，选择日期` : "选择日期", tooltip: "选择日期",
+        onClick: () => { calendarOpen = !calendarOpen; }},
+        h("Row", {gap: 6, alignItems: "center"},
+          text(day?.solarLabel || "黄历", {fontSize: 14, fontWeight: 600}),
+          text(day?.week || "", {key: "weekday", fontSize: 14, textColor: c.muted}),
+          text("▾", {fontSize: 12, textColor: c.faint}))),
+      h("Spacer"),
+      selectedDate !== null ? h("ButtonBase", {key: "today", padding: [3, 10], radius: 12, focusRing: true,
+        background: c.accentSoft, hover: {background: c.soft}, onClick: goToday},
+        text("回到今天", {fontSize: 12, fontWeight: 500, textColor: c.accent})) : null,
+      arrow("上一天", "‹", -1), arrow("下一天", "›", 1)),
+    calendarOpen ? h("Popover", {key: "date-popover", open: true, anchor: "date-heading",
+      onDismiss: () => { calendarOpen = false; }},
+      h("Calendar", {key: "date-picker", value: day?.date || "", onChange: pickDate})) : null,
+    dateError ? text(dateError, {key: "date-error", fontSize: 12, textColor: "danger", wrap: true}) : null);
+}
+
+function dayView(c) {
+  const good = day.luck === "吉";
+  return h("Column", {gap: 20, fillWidth: true},
+    h("Column", {gap: 8, alignItems: "center", fillWidth: true, padding: [8, 0, 4, 0]},
+      text(day.pillars, {key: "pillars", fontSize: 12, letterSpacing: 1, textColor: c.muted}),
+      serif(day.lunar, {key: "lunar-date", font: "Songti SC", fontSize: 40, lineHeight: 1.2, fontWeight: 900, letterSpacing: 4}),
+      h("Row", {gap: 6, alignItems: "center"},
+        day.festival ? chip(day.festival, c, true) : null,
+        chip(day.term.replace(" · ", " "), c),
+        chip(`${good ? "黄道" : "黑道"} · ${day.luck}`, c, good))),
+    card(c, {},
+      taboos("宜", day.recommends, c),
+      line(c),
+      taboos("忌", day.avoids, c),
+      line(c),
+      h("ButtonBase", {key: "details-toggle", label: detailsOpen ? "收起黄历详情" : "展开黄历详情",
+        fillWidth: true, padding: 0, focusRing: true, onClick: () => { detailsOpen = !detailsOpen; }},
+        h("Row", {gap: 6, alignItems: "center", fillWidth: true},
+          text("黄历详情", {fontSize: 12, textColor: c.muted}),
+          h("Spacer"),
+          text(detailsOpen ? "收起 ▴" : "展开 ▾", {fontSize: 12, textColor: c.faint}))),
+      detailsOpen ? h("Column", {key: "day-details", gap: 10, fillWidth: true},
+        day.details.map(([label, value]) => h("Row", {gap: 12, alignItems: "start", fillWidth: true},
+          text(label, {fontSize: 12, width: 56, shrink: 0, textColor: c.faint}),
+          text(value, {fontSize: 12, grow: 1, shrink: 1, minWidth: 0, wrap: true, lineHeight: 1.6})))) : null));
+}
+
+function hoursView(c) {
+  const isToday = day.date === clock.date;
+  const index = selectedHour ?? (isToday ? clock.hourIndex : 0);
+  const hour = day.hours[index];
+  const good = hour.luck === "吉";
+  return h("Column", {gap: 12, fillWidth: true},
+    h("Grid", {columns: 13, gap: 3, fillWidth: true}, day.hours.map((item, i) => {
+      const active = i === index;
+      const current = isToday && i === clock.hourIndex;
+      const lucky = item.luck === "吉";
+      return h("ButtonBase", {
+        key: `hour-${i}`, height: 54, fillWidth: true, padding: 0, radius: 8, focusRing: true,
+        alignItems: "center", justify: "center",
+        background: active ? c.accent : "#00000000",
+        border: [1, current && !active ? c.accent : "#00000000"],
+        hover: {background: active ? c.accent : c.soft},
+        label: `${item.title} ${item.range} ${item.luck}${current ? " 当前时辰" : ""}`,
+        tooltip: `${item.title} ${item.range} · ${item.cycle} · ${item.luck}${current ? " · 当前" : ""}`,
+        onClick: () => { selectedHour = i; },
+      }, h("Column", {gap: 3, alignItems: "center"},
+        serif(item.title[0], {fontSize: 20, lineHeight: 1, fontWeight: 700,
+          textColor: active ? c.card : lucky ? c.accent : c.ink}),
+        // 两个子时只靠钟点难以区分，直接标出初/正
+        item.title.startsWith("子")
+          ? serif(item.title[1], {fontSize: 12, lineHeight: 1, fontWeight: 600, textColor: active ? c.card : c.muted})
+          : text(item.shortRange.slice(0, 2), {fontSize: 12, lineHeight: 1, fontFeatures: "tnum",
+            textColor: active ? c.card : c.faint})));
+    })),
+    card(c, {},
+      // Row 不支持 baseline 对齐，用同一段 RichText 让标题、时间、吉凶共享基线
+      h("Row", {gap: 10, alignItems: "end", fillWidth: true},
+        h("RichText", {key: "hour-title", label: hour.title, lineHeight: 1.2, spans: [
+          {text: hour.title, font: "serif", size: 20, weight: 700},
+          {text: "　" + hour.range, size: 12, color: c.muted, features: "tnum"},
+          {text: "　" + hour.luck, size: 12, weight: 600, color: good ? c.accent : c.muted},
+        ]}),
+        h("Spacer"),
+        isToday ? h("ButtonBase", {key: "current-hour", padding: [0, 0, 2, 0], focusRing: true, label: "跟随当前时辰",
+          onClick: () => { selectedHour = null; }},
+          text(selectedHour === null ? `当前 ${clock.time}` : "回到当前", {fontSize: 12, textColor: c.accent})) : null),
+      h("Grid", {columns: 3, gap: 12, fillWidth: true},
+        fact("干支", `${hour.cycle} · ${hour.sound}`, c),
+        fact("星神", hour.star, c),
+        fact("冲煞", hour.clash, c),
+        fact("喜神", hour.joy, c),
+        fact("财神", hour.wealth, c),
+        fact("福神", hour.fortune, c)),
+      line(c),
+      taboos("宜", hour.recommends, c, true),
+      taboos("忌", hour.avoids, c, true)));
+}
+
+export default {
+  async scheduled(env) {
+    await refresh(env);
+  },
+  async event(name, payload) {
+    if (name === "lifecycle" && payload?.type === "expand" && lastEnv) await refresh(lastEnv);
+  },
+  render(env) {
+    lastEnv = env;
+    const dark = appearance?.matches;
+    const c = dark
+      ? {background: "#1b1715", card: "#25201d", line: "#352d28", soft: "#2f2824",
+        ink: "#efe7e1", muted: "#a89d95", faint: "#766b63", accent: "#e7785e", accentSoft: "#3b2620"}
+      : {background: "#f7f2ec", card: "#fffdfa", line: "#ebe3da", soft: "#f0e9e1",
+        ink: "#2a2420", muted: "#80766e", faint: "#ada299", accent: "#c0432e", accentSoft: "#f8e4dc"};
+    const retry = async () => { await refresh(lastEnv); };
+    const body = day ? [dayView(c), hoursView(c)] : [
+      h("Column", {height: 300, gap: 12, alignItems: "center", justify: "center"},
+        !error ? h("Spinner", {size: 20}) : null,
+        text(error ? "暂时无法显示黄历" : "正在加载黄历…", {fontSize: 14, textColor: c.muted}),
+        error ? h("Button", {key: "retry", text: "重试", onClick: retry}) : null),
+    ];
+    return {
+      tray: {
+        title: today ? (env.inputs.trayFormat === "day" ? today.lunarDay : today.lunar) : "黄历",
+        icon: today ? "data:image/svg+xml," + encodeURIComponent(moonSVG(today.moonDay)) : calendarIcon,
+        iconTemplate: true,
+        tooltip: today ? `${today.solarLabel} ${today.week}\n${today.pillars}` : "黄历",
+        error,
+        menu: [
+          {label: "回到今天", onClick: goToday, disabled: !today},
+          {label: "刷新", onClick: retry},
+        ],
+      },
+      panel: h("Column", {
+        preferredWidth: 480, preferredHeight: 720, fill: true, minHeight: 0, minWidth: 0,
+        safeArea: true, background: c.background, textColor: c.ink,
+        shortcuts: {"CmdOrCtrl+R": retry},
+      },
+      h("Scroll", {grow: 1, minHeight: 0, fillWidth: true},
+        h("Column", {padding: [16, 20, 24, 20], gap: 20, fillWidth: true},
+          dateHeader(c),
+          error ? h("Column", {gap: 8, padding: 12, radius: 8, background: c.soft, fillWidth: true},
+            text(error, {key: "runtime-error", fontSize: 12, textColor: "danger", wrap: true}),
+            day ? text(`保留数据日期：${day.date}`, {fontSize: 12, textColor: c.muted}) : null,
+            day ? h("Button", {text: "重试", onClick: retry}) : null) : null,
+          ...body))),
+    };
+  },
+};
+  ]]></script>
+</bar>
