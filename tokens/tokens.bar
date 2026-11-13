@@ -1,6 +1,6 @@
 <bar protocol-version="0" widget="true"
      category="ai"
-     version="1.2.0"
+     version="1.2.1"
      icon="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDY0IDY0IiBmaWxsPSJub25lIj48ZyBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiPjxwYXRoIGQ9Ik0xNCAxNWgzNiIvPjxwYXRoIGQ9Ik0zMiAxNXYzNCIvPjxwYXRoIGQ9Ik0yMiAyN2gyMCIgb3BhY2l0eT0iMC43NSIvPjxwYXRoIGQ9Ik0yNC41IDM3aDE1IiBvcGFjaXR5PSIwLjUiLz48cGF0aCBkPSJNMjcgNDdoMTAiIG9wYWNpdHk9IjAuMyIvPjwvZz48L3N2Zz4="
      description="Monitor AI coding token usage, daily spend, model breakdown, and multi-device submissions on Tokens (tokens.ci)."
      license="AGPL-3.0-only"
@@ -26,6 +26,10 @@
            type="secret"
            label="Read or API Token"
            help="Optional. A read token (`tkr_…`) unlocks a private profile; a personal API token (`tt_…`) unlocks unmasked device names." />
+    <input name="readToken"
+           type="secret"
+           label="Private Read Token"
+           help="Saved automatically by Connect Private Account. You can also paste a read token (`tkr_…`) here. Takes priority over a read token in Read or API Token." />
     <input name="trayFormat"
            type="select"
            label="Tray Display"
@@ -51,9 +55,9 @@
            help="Path to the credentials file written by `tokens login` (`~/.config/tokens/credentials.json`)." />
   </inputs>
 
-  <docs><![CDATA[Reads your Tokens account automatically from ~/.config/tokens/credentials.json after running `tokens login`. You can also enter any GitHub username in Inputs to view a public profile without signing in, or paste a Read Token (tkr_…) into Read or API Token to view a private profile. Add a small, medium, or large Metrix.Bar widget through your system's widget picker and select Tokens.]]></docs>
+  <docs><![CDATA[Reads your Tokens account automatically from ~/.config/tokens/credentials.json after running `tokens login`. If a private account only shows totals, click Connect Private Account to create and securely save a read token using your CLI login. Connecting enables Private Mode; it never makes the account public. Your CLI credentials and existing API token are preserved. You can also enter any GitHub username in Inputs to view a public profile without signing in, or paste a Read Token (tkr_…) into Private Read Token. Add a small, medium, or large Metrix.Bar widget through your system's widget picker and select Tokens.]]></docs>
 
-  <script apis="app clipboard dialog localStorage match-media screenshot shell"><![CDATA[
+  <script apis="app auth clipboard dialog localStorage match-media screenshot shell"><![CDATA[
 // Tokens (tokens.ci) AI coding usage dashboard for Metrix.Bar.
 
 const h = (type, props, ...children) => ({
@@ -518,7 +522,10 @@ const I18N = {
   deviceDetailTitle: "Device Detail",
   deviceRecentDays: "Daily Submissions",
   privateModeBadge: "Private",
-  privateFallbackNotice: "This account is in Private Mode. Showing aggregate & device stats via CLI token. Add a Read Token (tkr_…) in Inputs for full model/client breakdowns.",
+  privateFallbackNotice: "Client and model details need a read token. Connect using your CLI login to create one and enable Private Mode.",
+  privateFallbackManual: "Client and model details need a read token. Add one in Inputs, or run `tokens login` to connect.",
+  connectPrivate: "Connect Private Account",
+  connectingPrivate: "Connecting…",
   bannedNotice: r => `Account banned${r ? ": " + r : ""}`,
   setupTitle: "Connect to Tokens",
   setupDesc: "Run `tokens login` in your terminal for automatic detection, or enter any GitHub username in this dashboard's Inputs.",
@@ -691,8 +698,12 @@ let baseURL = "https://tokens.ci";
 let inputUsername = "";
 let credentialsPath = "~/.config/tokens/credentials.json";
 let secretToken = "";
+let savedReadToken = "";
 let trayFormat = "today_cost";
 let inputErr = "";
+let connectingPrivate = false;
+let privateConnectError = "";
+let pendingReadToken = "";
 
 // Resolved identity & tokens
 let resolvedUsername = "";
@@ -759,24 +770,26 @@ function readSecret(name) {
 
 function redact(msg) {
   let text = String(msg || "");
-  for (const s of [secretToken, resolvedApiToken, resolvedReadToken]) {
+  for (const s of [secretToken, savedReadToken, pendingReadToken, resolvedApiToken, resolvedReadToken]) {
     if (s && s.length >= 4) text = text.split(s).join("•••");
   }
-  return text.slice(0, 220);
+  return text.replace(/\b(?:tkr|tt)_[A-Za-z0-9_-]+/g, "•••").slice(0, 220);
 }
 
 function syncInputs(env) {
+  syncInputs.env = env;
   const inputs = (env && env.inputs) || {};
   const parsed = parseBaseURL(inputs.baseURL);
   const nextUser = str(inputs.username).replace(/^@/, "");
   const nextCreds = str(inputs.credentials) || "~/.config/tokens/credentials.json";
   const nextSecret = readSecret("token");
+  const nextReadToken = readSecret("readToken");
   const nextTray = str(inputs.trayFormat) || "today_cost";
   if (["today_cost", "today_rank", "total_rank", "total_cost", "today_only", "cost_only"].includes(nextTray)) {
     trayFormat = nextTray;
   }
 
-  const sig = `${parsed.url}\n${parsed.err}\n${nextUser}\n${nextCreds}\n${nextSecret}`;
+  const sig = `${parsed.url}\n${parsed.err}\n${nextUser}\n${nextCreds}\n${nextSecret}\n${nextReadToken}`;
   if (sig === syncInputs.sig) return;
   syncInputs.sig = sig;
   baseURL = parsed.url;
@@ -784,6 +797,9 @@ function syncInputs(env) {
   inputUsername = nextUser;
   credentialsPath = nextCreds;
   secretToken = nextSecret;
+  savedReadToken = nextReadToken;
+  privateConnectError = "";
+  pendingReadToken = "";
 
   resolvedUsername = inputUsername;
   resolvedApiToken = "";
@@ -834,30 +850,26 @@ async function resolveCredentials() {
     }
   }
 
-  resolvedReadToken = readTok;
-  resolvedApiToken = apiTok;
+  resolvedReadToken = savedReadToken || readTok;
+  resolvedApiToken = "";
+  resolvedUsername = targetUser;
 
-  if (!targetUser && apiTok && baseURL) {
+  if (apiTok && baseURL) {
     try {
-      const res = await fetch(`${baseURL}/api/auth/token`, {
-        headers: { Authorization: `Bearer ${apiTok}`, Accept: "application/json" },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.user && str(data.user.username)) {
-          resolvedUsername = str(data.user.username);
-          return;
-        }
+      const data = await fetchJSON("/api/auth/token", apiTok, { redirect: "error" });
+      const owner = str(data && data.user && data.user.username);
+      if (owner && (!targetUser || owner.toLowerCase() === targetUser.toLowerCase())) {
+        resolvedUsername = targetUser || owner;
+        resolvedApiToken = apiTok;
       }
     } catch (e) {}
   }
-  resolvedUsername = targetUser;
 }
 
-async function fetchJSON(path, token) {
-  const headers = { Accept: "application/json" };
+async function fetchJSON(path, token, options = {}) {
+  const headers = { Accept: "application/json", ...options.headers };
   if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(baseURL + path, { headers });
+  const res = await fetch(baseURL + path, { ...options, headers });
   const text = await res.text();
   let data = null;
   try {
@@ -872,6 +884,57 @@ async function fetchJSON(path, token) {
     throw err;
   }
   return data;
+}
+
+function connectPrivateAccount() {
+  const prof = currentProfile();
+  if (connectingPrivate || loading || !resolvedApiToken || !prof || !prof.privateFallback) return;
+  const sig = syncInputs.sig;
+  const username = resolvedUsername;
+  const apiToken = resolvedApiToken;
+  connectingPrivate = true;
+  privateConnectError = "";
+  $metrix.invalidate();
+  void (async () => {
+    let failure = "Couldn't verify your CLI login. Sign in with `tokens login` and retry.";
+    try {
+      const auth = await fetchJSON("/api/auth/token", apiToken, { redirect: "error" });
+      if (str(auth && auth.user && auth.user.username).toLowerCase() !== username.toLowerCase()) {
+        failure = "Your CLI login belongs to a different account. Check the dashboard's Inputs.";
+        throw new Error(failure);
+      }
+      failure = "Account settings changed. Please retry.";
+      if (sig !== syncInputs.sig) throw new Error(failure);
+      if (!pendingReadToken) {
+        failure = "Couldn't create a read token. Please retry or add one in Inputs.";
+        const data = await fetchJSON("/api/me/private", apiToken, {
+          method: "POST",
+          redirect: "error",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tokenName: "Metrix.Bar" }),
+        });
+        const token = data && data.readToken && data.readToken.token;
+        if (!data || data.private !== true || typeof token !== "string" || !/^tkr_[0-9a-f]{48}$/.test(token)) {
+          throw new Error(failure);
+        }
+        failure = "Account settings changed. Please retry.";
+        if (sig !== syncInputs.sig) throw new Error(failure);
+        pendingReadToken = token;
+      }
+      failure = "Couldn't save the read token. Retry to finish connecting.";
+      await $metrix.setSecret("readToken", pendingReadToken);
+      if (inflight) await inflight;
+      syncInputs(syncInputs.env);
+      profileCache.clear();
+      deviceDetailCache.clear();
+      await refresh();
+    } catch (e) {
+      privateConnectError = failure;
+    } finally {
+      connectingPrivate = false;
+      $metrix.invalidate();
+    }
+  })();
 }
 
 function buildProfileFromMeStats(me, username) {
@@ -1775,10 +1838,28 @@ function Banner() {
       : null,
     prof && prof.privateFallback
       ? h(
-          "Row",
-          { tw: "gap-2 py-2 px-2.5 rounded-lg bg-surfaceHover items-center w-full min-w-0" },
-          Icon("lock", 13, K.warn),
-          TX(t.privateFallbackNotice, { tw: "text-[11px] text-textMuted min-w-0 shrink grow leading-[1.35]" })
+          "Column",
+          { tw: "gap-2 py-2 px-2.5 rounded-lg bg-surfaceHover w-full min-w-0" },
+          h(
+            "Row",
+            { tw: "gap-2 items-center w-full min-w-0" },
+            Icon("lock", 13, K.warn),
+            TX(resolvedApiToken ? t.privateFallbackNotice : t.privateFallbackManual, {
+              tw: "text-[11px] text-textMuted min-w-0 shrink grow leading-[1.35]",
+            })
+          ),
+          resolvedApiToken
+            ? h("Button", {
+                key: "connect-private-account",
+                label: t.connectPrivate,
+                disabled: connectingPrivate || loading,
+                onClick: connectPrivateAccount,
+                tw: "self-start text-[11px]",
+              }, connectingPrivate ? t.connectingPrivate : t.connectPrivate)
+            : null,
+          privateConnectError
+            ? TX(privateConnectError, { tw: "text-[11px] text-danger leading-[1.35]" })
+            : null
         )
       : null
   );

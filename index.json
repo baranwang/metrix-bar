@@ -23,15 +23,15 @@
       "name": "Tokens",
       "file": "tokens/tokens.bar",
       "protocol_version": "0",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "widget": true,
       "category": "ai",
       "description": "Monitor AI coding token usage, daily spend, model breakdown, and multi-device submissions on Tokens (tokens.ci).",
       "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDY0IDY0IiBmaWxsPSJub25lIj48ZyBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiPjxwYXRoIGQ9Ik0xNCAxNWgzNiIvPjxwYXRoIGQ9Ik0zMiAxNXYzNCIvPjxwYXRoIGQ9Ik0yMiAyN2gyMCIgb3BhY2l0eT0iMC43NSIvPjxwYXRoIGQ9Ik0yNC41IDM3aDE1IiBvcGFjaXR5PSIwLjUiLz48cGF0aCBkPSJNMjcgNDdoMTAiIG9wYWNpdHk9IjAuMyIvPjwvZz48L3N2Zz4=",
       "license": "AGPL-3.0-only",
       "homepage": "https://github.com/baranwang/metrix-bar/tree/main/tokens",
-      "docs": "Reads your Tokens account automatically from ~/.config/tokens/credentials.json after running `tokens login`. You can also enter any GitHub username in Inputs to view a public profile without signing in, or paste a Read Token (tkr_…) into Read or API Token to view a private profile. Add a small, medium, or large Metrix.Bar widget through your system's widget picker and select Tokens.",
-      "sha256": "db155f221e98ec1f47df8a41847a2b4f422d34455f6330378812178d0e3cb718"
+      "docs": "Reads your Tokens account automatically from ~/.config/tokens/credentials.json after running `tokens login`. If a private account only shows totals, click Connect Private Account to create and securely save a read token using your CLI login. Connecting enables Private Mode; it never makes the account public. Your CLI credentials and existing API token are preserved. You can also enter any GitHub username in Inputs to view a public profile without signing in, or paste a Read Token (tkr_…) into Private Read Token. Add a small, medium, or large Metrix.Bar widget through your system's widget picker and select Tokens.",
+      "sha256": "253bac972d1698ce096fb477f42be6b92dbd50cfe8da66969ccea2ee0e433942"
     }
   ]
 }
